@@ -1,0 +1,34 @@
+{
+  "productName": "Advanced JSON Parser Test Suite",
+  "version": 3.1,
+  "isAvailable": true,
+  "metadata": {
+    "creationDate": "2025-11-13",
+    "author": "AI Assistant"
+  },
+  "configurations": [
+    {
+      "id": 101,
+      "setting": "high_fidelity",
+      "status": "active",
+      "params": [50, 100, 150]
+    },
+    {
+      "id": 102,
+      "setting": "low_power",
+      "status": "standby",
+      "params": [10, 20]
+    },
+    {
+      "id": 103,
+      "setting": "default",
+      "status": "inactive"
+    }
+  ],
+  "dependencies": [
+    "library_a",
+    "library_b",
+    "library_c"
+  ],
+  "nullField": null
+}

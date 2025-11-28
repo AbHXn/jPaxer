@@ -1,0 +1,190 @@
+{
+  "meta": {
+    "version": "ultra-1.0",
+    "generated_at": "2025-11-26T06:40:00Z",
+    "description": "Ultra complex synthetic dataset for multi-domain applications",
+    "tags": ["system", "users", "analytics", "simulation", "ai", "network"]
+  },
+  "systems": [
+    {
+      "id": "sys-001",
+      "name": "CoreCluster",
+      "location": "datacenter-eu-west",
+      "hardware": {
+        "cpu": { "model": "Xeon-8890v4", "cores": 64, "threads": 128 },
+        "ram_gb": 1024,
+        "storage": [
+          { "type": "NVMe", "size_gb": 8192, "iops": 950000 },
+          { "type": "SATA", "size_gb": 16384, "iops": 125000 }
+        ]
+      },
+      "network": {
+        "interfaces": [
+          { "name": "eth0", "ipv4": "10.0.0.21", "mac": "AA:00:FF:12:33:44" },
+          { "name": "eth1", "ipv4": "10.0.1.21", "mac": "AA:00:FF:12:33:45" }
+        ],
+        "bandwidth_gbps": 200
+      },
+      "services": [
+        {
+          "id": "svc-001",
+          "type": "auth",
+          "status": "running",
+          "threads": 142,
+          "latency_ms": 3.12,
+          "config": {
+            "token_expiry": "24h",
+            "encryption": "RSA-4096",
+            "replicas": 6,
+            "rate_limit": { "per_min": 100000 }
+          }
+        },
+        {
+          "id": "svc-002",
+          "type": "vector-db",
+          "status": "running",
+          "embeddings": {
+            "dimensions": 2048,
+            "index_type": "HNSW",
+            "shards": 12,
+            "replication_factor": 3
+          }
+        }
+      ]
+    },
+    {
+      "id": "sys-002",
+      "name": "EdgeCluster",
+      "location": "datacenter-us-east",
+      "hardware": {
+        "cpu": { "model": "Ryzen-5950X", "cores": 32, "threads": 64 },
+        "ram_gb": 512,
+        "storage": [
+          { "type": "NVMe", "size_gb": 4096, "iops": 500000 },
+          { "type": "SATA", "size_gb": 8192, "iops": 100000 }
+        ]
+      },
+      "network": {
+        "interfaces": [
+          { "name": "eth0", "ipv4": "10.1.0.10", "mac": "BB:01:CC:22:33:44" }
+        ],
+        "bandwidth_gbps": 100
+      },
+      "services": [
+        {
+          "id": "svc-003",
+          "type": "web",
+          "status": "running",
+          "threads": 64,
+          "latency_ms": 8.45,
+          "config": {
+            "ssl": true,
+            "caching": { "enabled": true, "ttl_sec": 3600 },
+            "replicas": 4
+          }
+        }
+      ]
+    }
+  ],
+  "users": [
+    {
+      "user_id": 1,
+      "name": "Alice",
+      "email": "alice@example.com",
+      "roles": ["admin", "editor"],
+      "preferences": {
+        "theme": "dark",
+        "language": "en",
+        "notifications": {
+          "email": true,
+          "sms": false,
+          "push": true
+        }
+      },
+      "devices": [
+        { "type": "desktop", "ip": "192.168.0.18" },
+        { "type": "mobile", "ip": "192.168.0.22" }
+      ],
+      "activity": [
+        { "timestamp": "2025-11-25T12:00:00Z", "action": "login" },
+        { "timestamp": "2025-11-25T12:05:00Z", "action": "update_settings" },
+        { "timestamp": "2025-11-25T12:10:00Z", "action": "logout" }
+      ]
+    },
+    {
+      "user_id": 2,
+      "name": "Bob",
+      "email": "bob@example.com",
+      "roles": ["viewer"],
+      "preferences": {
+        "theme": "light",
+        "language": "fr",
+        "notifications": {
+          "email": true,
+          "sms": false,
+          "push": true
+        }
+      },
+      "devices": [
+        { "type": "desktop", "ip": "192.168.1.18" }
+      ],
+      "activity": [
+        { "timestamp": "2025-11-24T09:00:00Z", "action": "login" },
+        { "timestamp": "2025-11-24T09:15:00Z", "action": "view_page", "page": "/products" },
+        { "timestamp": "2025-11-24T09:45:00Z", "action": "logout" }
+      ]
+    }
+  ],
+  "events": [
+    {
+      "event_id": "evt-00001",
+      "type": "system_alert",
+      "severity": "critical",
+      "timestamp": "2025-11-26T06:30:00Z",
+      "details": {
+        "system": "sys-001",
+        "service": "svc-001",
+        "message": "CPU overload detected",
+        "metrics": { "cpu": 98.7, "ram": 880 }
+      }
+    },
+    {
+      "event_id": "evt-00002",
+      "type": "user_activity",
+      "severity": "info",
+      "timestamp": "2025-11-26T06:31:00Z",
+      "details": {
+        "user_id": 1,
+        "action": "login",
+        "ip": "192.168.0.18"
+      }
+    }
+  ],
+  "simulation_world": {
+    "world_id": "world-001",
+    "regions": [
+      {
+        "region_id": "r-001",
+        "name": "Northland",
+        "cities": [
+          {
+            "city_id": "c-001",
+            "name": "AlphaCity",
+            "population": 1200000,
+            "npcs": [
+              {
+                "npc_id": "npc-001",
+                "name": "Guardian",
+                "role": "guard",
+                "inventory": [
+                  { "item_id": "itm-001", "name": "Sword", "damage": 25 },
+                  { "item_id": "itm-002", "name": "Shield", "defense": 15 }
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  }
+}
