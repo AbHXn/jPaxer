@@ -1,0 +1,185 @@
+#include "jpaxer.h"
+
+void JSON_FLUSH(JSON_NODE* json_data, FILE* json_file, int indent) {
+    if (!json_data) return;
+
+    int is_list       = json_data->multiple_values;
+    jobject* contents = json_data->value.object_val;
+    bool first        = true;
+
+    for (int i = 0; i < indent; i++) 
+        fputc(' ', json_file);
+
+    fputc(is_list ? '[' : '{', json_file);
+    fputc('\n', json_file);
+
+    while (contents) {
+        JSON_NODE* jnode = contents->j_node;
+
+        if (!first) {
+            fputc(',', json_file);
+            fputc('\n', json_file);
+        }
+        first = false;
+
+        for ( int i = 0; i < indent + 4; i++ ) 
+            fputc(' ', json_file);
+
+        if ( !is_list ) 
+            fprintf(json_file, "\"%s\": ", jnode->key);
+
+        switch (jnode->dtype) {
+            case J_STRING:
+                fprintf(json_file, "\"%s\"", jnode->value.string_val);
+                break;
+            case J_INT:
+                fprintf(json_file, "%d", *(jnode->value.int_val));
+                break;
+            case J_DOUBLE:
+                fprintf(json_file, "%f", *(jnode->value.double_val));
+                break;
+            case J_BOOL:
+                fprintf(json_file, "%s", *(jnode->value.bool_val) ? "true" : "false");
+                break;
+            case J_NULL:
+                fprintf(json_file, "null");
+                break;
+            case J_OBJECT:
+                fputc('\n', json_file);
+                JSON_FLUSH(jnode, json_file, indent + 4);
+                break;
+        }
+        contents = contents->next;
+    }
+    fputc('\n', json_file);
+    
+    for (int i = 0; i < indent; i++) 
+        fputc(' ', json_file);
+
+    fputc(is_list ? ']' : '}', json_file);
+}
+
+void __read__( JSON_NODE** j_node, const char* key ){
+    if( j_node == NULL || *j_node == NULL )
+        return ;
+    JSON_NODE* c_jnode = *j_node;
+    if( c_jnode->dtype != J_OBJECT ){
+        ERROR(stderr, "JSON_NODE is not a object to get key\n" );
+        return;
+    }  
+    jobject* pairs = c_jnode->value.object_val;
+    while( pairs ){
+        if( strcmp( pairs->j_node->key, key ) == 0 ){
+            *j_node = pairs->j_node;
+            return;
+        }
+        pairs = pairs->next;
+    }
+    ERROR(stderr, "Object has no key %s\n", key );
+}
+
+void __update__( JSON_NODE** j_node, const char* key, void* value, JSON_DTYPE dtype ){
+    if( j_node == NULL || *j_node == NULL || !key || !value ) return ;
+    
+    JSON_NODE* c_jnode = *j_node;
+    if( c_jnode->dtype != J_OBJECT ){
+        ERROR(stderr, "JSON_NODE is not an object get key\n");
+        return ;
+    }
+    jobject* pairs = c_jnode->value.object_val;
+    while( pairs ) {
+        if( strcmp( pairs->j_node->key, key ) == 0 ){
+            JSON_NODE* obj = pairs->j_node;
+            // its a stack memory
+            switch( obj->dtype ){
+                case J_INT:
+                    obj->value.int_val    = NULL;
+                    break;
+                case J_DOUBLE:
+                    obj->value.double_val = NULL;
+                    break;
+                case J_STRING:
+                    obj->value.string_val = NULL;
+                    break;
+                case J_BOOL:
+                    obj->value.bool_val   = NULL;
+                    break;
+                case J_OBJECT:
+                    obj->value.object_val = NULL;
+                    break;
+                default:
+                    break;
+            }
+            fill_value_acc( &obj, value, dtype );
+            obj->dtype = dtype;
+            return;
+        }
+        pairs = pairs->next;
+    }
+    ERROR(stderr, "key doesn't exists\n");
+}
+
+void __delete__( JSON_NODE** j_node, const char* key ){
+    if( j_node == NULL || *j_node == NULL || !key ) 
+        return ;
+    JSON_NODE* c_jnode = *j_node;
+    
+    if( c_jnode->dtype != J_OBJECT ){
+        ERROR(stderr, "JSON_NODE is not an object get key\n");
+        return ;
+    }
+    jobject* pairs = c_jnode->value.object_val;
+    jobject* prev  = NULL;
+
+    while( pairs ){
+        if( pairs->j_node && strcmp( pairs->j_node->key, key ) == 0 ){
+            if( prev ){
+                prev->next = pairs->next;
+                pairs->next = NULL;
+                return;
+            }
+            c_jnode->value.object_val = pairs->next;
+            return;
+        }
+        prev = pairs;
+        pairs = pairs->next;
+    }
+}
+
+void __create__( JSON_NODE** j_node, const char* key, void* value, JSON_DTYPE dtype ){
+    if( j_node == NULL || *j_node == NULL || !key || !value )  return ;
+    JSON_NODE* c_jnode = *j_node;
+    if( c_jnode->dtype != J_OBJECT ){
+        ERROR(stderr, "JSON_NODE is not an object get key\n");
+        return ;
+    }
+    jobject* pairs    = c_jnode->value.object_val;
+    JSON_NODE* n_node = get_jnode( key );
+
+    if( !n_node ){
+        ERROR(stderr, "Failed to create new node\n");
+        return ;
+    }
+    fill_value_acc( &n_node, value, dtype );
+    n_node->dtype      = dtype;
+    jobject* n_jobject = get_jobject( n_node );
+
+    if( !n_jobject ){
+        ERROR(stderr, "Failed to create jobject\n");
+        return ;
+    }
+    if( !pairs ){
+        c_jnode->value.object_val = n_jobject;
+        return ;
+    }
+    while( pairs->next )
+        pairs = pairs->next;
+    pairs->next = n_jobject;
+}
+
+void __back__( JSON_NODE** j_node ){
+    if( !j_node || *j_node == NULL )
+        return;
+    if( (*j_node)->parent != NULL )
+        *j_node = (*j_node)->parent;
+}
