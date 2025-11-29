@@ -59,23 +59,30 @@ void JSON_FLUSH(JSON_NODE* json_data, FILE* json_file, int indent) {
     fputc(is_list ? ']' : '}', json_file);
 }
 
-void __read__( JSON_NODE** j_node, const char* key ){
-    if( j_node == NULL || *j_node == NULL )
-        return ;
-    JSON_NODE* c_jnode = *j_node;
-    if( c_jnode->dtype != J_OBJECT ){
-        ERROR(stderr, "JSON_NODE is not a object to get key\n" );
-        return;
-    }  
-    jobject* pairs = c_jnode->value.object_val;
-    while( pairs ){
-        if( strcmp( pairs->j_node->key, key ) == 0 ){
-            *j_node = pairs->j_node;
+void __read__( JSON_NODE** j_node, int counts, ... ){
+    if( j_node == NULL || *j_node == NULL ) return ;
+    
+    va_list args;
+    va_start( args, counts );
+
+    for( int cnt = 0; cnt < counts; cnt++ ){
+        const char* key = va_arg( args, const char* );
+        JSON_NODE* c_jnode = *j_node;
+        if( c_jnode->dtype != J_OBJECT ){
+            ERROR(stderr, "JSON_NODE is not a object to get key\n" );
             return;
+        }  
+        jobject* pairs = c_jnode->value.object_val;
+        while( pairs ){
+            if( strcmp( pairs->j_node->key, key ) == 0 ){
+                *j_node = pairs->j_node;
+                break;
+            }
+            pairs = pairs->next;
         }
-        pairs = pairs->next;
+        if( pairs == NULL ) 
+            ERROR(stderr, "Object has no key %s\n", key );
     }
-    ERROR(stderr, "Object has no key %s\n", key );
 }
 
 void __update__( JSON_NODE** j_node, const char* key, void* value, JSON_DTYPE dtype ){
@@ -177,9 +184,8 @@ void __create__( JSON_NODE** j_node, const char* key, void* value, JSON_DTYPE dt
     pairs->next = n_jobject;
 }
 
-void __back__( JSON_NODE** j_node ){
-    if( !j_node || *j_node == NULL )
-        return;
-    if( (*j_node)->parent != NULL )
+void __back__( JSON_NODE** j_node, int steps ){
+    if( !j_node || *j_node == NULL ) return;
+    while( steps-- > 0 && (*j_node)->parent != NULL )
         *j_node = (*j_node)->parent;
 }
