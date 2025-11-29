@@ -56,6 +56,13 @@ typedef enum status_flags{
 	VALUE_LICENSE			= 1 << 5,
 }INPUT_STATUS;
 
+typedef enum {
+	NO_FLUSH_HAPPENDED,
+	COMMA_FLUSH		  ,
+	CLOSSING_FLUSH    ,
+}FLUSH_TYPE;
+
+
 typedef struct _env{
 	JSON_NODE* json_node;
 	int 	   FLAG;

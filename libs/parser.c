@@ -106,6 +106,16 @@ static inline bool is_json_syntax( char c ){
 	}
 }
 
+static inline void terminate_value_if_filling( WORKING_ENV** env ){
+	if( !env || !( *env ) ) return ;
+	
+	if ( is_in_filling_mode(( *env )->FLAG )){
+		( *env )->FLAG = turn_off( ( *env )->FLAG, SOMETHING_INPUTING );
+		( *env )->FLAG = turn_on( ( *env )->FLAG, VALUE_ENTERED );
+		terminate_string( ( *env )->value, ( *env )->v_index );
+	}
+}
+
 /* STACK_DATA creation for push to stack */
 STACK_DATA* get_stack_data( JSON_NODE* j_data ){
 	if( !j_data ) return NULL;
@@ -224,18 +234,113 @@ bool FLUSH_THE_STACK( WORKING_ENV** env, STACK** dfs_stack ){
 	return add_J_NODE_to_jobject( &(new_top_stack_data->j_data), top_stack_data->j_data );
 }
 
-typedef enum {
-	NO_FLUSH_HAPPENDED,
-	COMMA_FLUSH		  ,
-	CLOSSING_FLUSH    ,
-}FLUSH_TYPE;
+void handle_open_square_or_curly( WORKING_ENV** env, int c_char, STACK** dfs_stack  ){
+	if( !env || !(*env) || !dfs_stack )
+			return;
+	if( !is_key_filled( (*env)->FLAG ) && !is_in_filling_mode( (*env)->FLAG )){
+		PARSER_ERR_RAISED = PARSER_SYNTAX_ERROR;
+		return;
+	}
+	strip( (*env)->key );
+	JSON_NODE *new_node = get_jnode( (*env)->key );
+	add_parent_info_from_stack( &new_node, *dfs_stack );
+
+	if( !new_node ){
+		ERROR( stderr, "%s\n", get_object_error_msg( get_object_error() ) );
+		PARSER_ERR_RAISED = PARSER_ALLOCATION_ERROR;
+		return;	
+	}
+	new_node->dtype 		   = J_OBJECT;
+	new_node->multiple_values  = ( c_char == OPEN_S ) ? true: false; 
+	new_node->value.object_val = NULL;
+
+	if( *dfs_stack ){
+		STACK_DATA* top_node = ( STACK_DATA* ) top( dfs_stack );
+		top_node->list_index = (*env)->list_index;
+		top_node->FLAG 		 = (*env)->FLAG;
+	}
+	if( !push_JSON_NODE_to_stack ( (void *) new_node, dfs_stack ) ){
+		ERROR( stderr, "%s\n", get_stack_error_msg( get_stack_error() ) );
+		PARSER_ERR_RAISED = PARSER_EXTERNAL_ERROR;
+		return;
+	}
+	RESET_ENV ( env ); 
+	if( c_char == OPEN_S ){
+		(*env)->list_index = 0;
+		list_action( env );
+	}
+	else (*env)->FLAG = 0b00000;
+}
+
+void handle_comma( WORKING_ENV** env, int c_char, STACK** dfs_stack ){
+	bool eligible = is_key_filled( (*env)->FLAG ) && 	\
+					( is_value_filling( (*env)->FLAG ) 	\
+					|| is_value_filled ((*env)->FLAG ));
+
+	if( !eligible ){
+		PARSER_ERR_RAISED = PARSER_SYNTAX_ERROR;
+		return ;
+	}	
+	terminate_value_if_filling( env );	
+
+	JSON_NODE* new_node = get_full_JSON_NODE_pair_from_env( (*env) );
+	if( !new_node ) return ;
+		
+	add_parent_info_from_stack( &new_node, *dfs_stack );
+	STACK_DATA* top_node = (STACK_DATA *) top( dfs_stack );
+	if( !add_J_NODE_to_jobject( &(top_node->j_data), new_node ) )
+		return ;
+
+	RESET_ENV ( env ); 	
+	if( is_list_filling( (*env)->FLAG ) )
+		list_action( env );
+	else (*env)->FLAG = 0b00000;
+}
+
+void handle_closing_square_or_curly( WORKING_ENV**env, int c_char, STACK** dfs_stack ){
+	if( !env || !(*env) || !dfs_stack )
+		return;
+
+	terminate_value_if_filling( env );	
+	
+	if( !FLUSH_THE_STACK( env, dfs_stack ) ){
+		ERROR(stderr, "Stack Flush Error\n");
+		if( PARSER_ERR_RAISED == NO_PARSER_ERROR )
+			PARSER_ERR_RAISED = PARSER_INTERNAL_ERROR;
+		return ;
+	}
+	if( dfs_stack ){
+		STACK_DATA* top_node = ( STACK_DATA* ) top( dfs_stack );
+		RESET_ENV( env );
+		(*env)->FLAG 		 = top_node->FLAG;
+		(*env)->list_index   = top_node->list_index;
+	}
+	(*env)->FLAG &= LIST_INPUTING;
+	
+	if( is_list_filling( (*env)->FLAG ) )
+		list_action( env );
+}
+
+void fill_inputs( WORKING_ENV** env, int c_char ){
+	if( is_value_licensed( (*env)->FLAG ) ){
+		(*env)->FLAG = turn_off( (*env)->FLAG, VALUE_LICENSE );
+		(*env)->FLAG = turn_on( (*env)->FLAG, SOMETHING_INPUTING );
+	}
+	if( !is_in_filling_mode( (*env)->FLAG ) ){
+		PARSER_ERR_RAISED = PARSER_SYNTAX_ERROR;
+		return ;
+	}
+	( !is_key_filled( (*env)->FLAG ) ) \
+		? safe_push( (*env)->key, &((*env)->k_index), c_char, MAX_KEY_SIZE )
+		: safe_push( (*env)->value, &((*env)->v_index), c_char, MAX_VALUE_SIZE );
+}
 
 JSON_NODE* parse_JSON_from_FILE( FILE* JSON_file ){
 	if( !JSON_file ){
 		ERROR(stderr, "JSON file not provide\n");
 		return NULL;
 	}
-	
+
 	int c_char;
 	JSON_FILE 					= JSON_file;
 	STACK* dfs_stack 			= NULL;
@@ -259,69 +364,17 @@ JSON_NODE* parse_JSON_from_FILE( FILE* JSON_file ){
 					if( flushed_before == COMMA_FLUSH ){
 						PARSER_ERR_RAISED = PARSER_SYNTAX_ERROR;
 						goto END;
-					}
-					if( is_in_filling_mode( env->FLAG ) ){
-						env->FLAG = turn_off( env->FLAG, SOMETHING_INPUTING );
-						env->FLAG = turn_on( env->FLAG, VALUE_ENTERED );
-						terminate_string( env->value, env->v_index );
-					}
-					if( !FLUSH_THE_STACK( &env, &dfs_stack ) ){
-						ERROR(stderr, "Stack Flush Error\n");
-						if( PARSER_ERR_RAISED == NO_PARSER_ERROR ){
-							PARSER_ERR_RAISED = PARSER_INTERNAL_ERROR;
-						}
+					}		
+					handle_closing_square_or_curly( &env, c_char, &dfs_stack );
+					if( PARSER_ERR_RAISED != NO_PARSER_ERROR )
 						goto END;
-					}
-					if( dfs_stack ){
-						STACK_DATA* top_node = ( STACK_DATA* ) top( &dfs_stack );
-						RESET_ENV( &env );
-						env->FLAG = top_node->FLAG;
-						env->list_index  =  top_node->list_index;
-					}
-					env->FLAG &= LIST_INPUTING;
-					
-					if( is_list_filling( env->FLAG ) )
-						list_action( &env );
 					flushed_before = CLOSSING_FLUSH;
 					break;
 				}
-				case OPEN_S:
-				case OPEN_C: {	
-					if( !is_key_filled( env->FLAG ) && !is_in_filling_mode( env->FLAG )){
-						PARSER_ERR_RAISED = PARSER_SYNTAX_ERROR;
-						goto END;
-					}
-					strip( env->key );
-					JSON_NODE *new_node = get_jnode( env->key );
-					add_parent_info_from_stack( &new_node, dfs_stack );
-
-					if( !new_node ){
-						ERROR( stderr, "%s\n", get_object_error_msg( get_object_error() ) );
-						PARSER_ERR_RAISED = PARSER_ALLOCATION_ERROR;
-						goto END;	
-					}
-					new_node->dtype 		   = J_OBJECT;
-					new_node->multiple_values  = ( c_char == OPEN_S ) ? true: false; 
-					new_node->value.object_val = NULL;
-
-					if( dfs_stack ){
-						STACK_DATA* top_node = ( STACK_DATA* ) top( &dfs_stack );
-						top_node->list_index = env->list_index;
-						top_node->FLAG 		 = env->FLAG;
-					}
-					if( !push_JSON_NODE_to_stack ( (void *) new_node, &dfs_stack ) ){
-						ERROR( stderr, "%s\n", get_stack_error_msg( get_stack_error() ) );
-						PARSER_ERR_RAISED = PARSER_EXTERNAL_ERROR;
-						goto END;
-					}
-					RESET_ENV ( &env ); 
-					if( c_char == OPEN_S ){
-						env->list_index = 0;
-						list_action( &env );
-					}
-					else env->FLAG = 0b00000;
+				case OPEN_S: 
+				case OPEN_C: 	
+					handle_open_square_or_curly( &env, c_char, &dfs_stack );
 					break;
-				}
 				case SEMI: {
 					if( !is_key_filled ( env->FLAG ) || is_in_filling_mode( env->FLAG )){
 						PARSER_ERR_RAISED = PARSER_SYNTAX_ERROR;
@@ -338,30 +391,9 @@ JSON_NODE* parse_JSON_from_FILE( FILE* JSON_file ){
 						PARSER_ERR_RAISED = PARSER_SYNTAX_ERROR;
 						goto END;
 					}
-					bool eligible = is_key_filled( env->FLAG ) && \
-									(is_value_filling( env->FLAG ) || is_value_filled (env->FLAG));
-
-					if( !eligible ){
-						PARSER_ERR_RAISED = PARSER_SYNTAX_ERROR;
+					handle_comma( &env, c_char, &dfs_stack );
+					if( PARSER_ERR_RAISED != NO_PARSER_ERROR )
 						goto END;
-					}
-					if( is_value_filling(env->FLAG) ){
-						env->FLAG = turn_off( env->FLAG, SOMETHING_INPUTING );
-						env->FLAG = turn_on( env->FLAG, VALUE_ENTERED );
-						terminate_string( env->value, env->v_index );
-					}
-					JSON_NODE* new_node = get_full_JSON_NODE_pair_from_env( env );
-					if( !new_node ) goto END;
- 					
- 					add_parent_info_from_stack( &new_node, dfs_stack );
-					STACK_DATA* top_node = (STACK_DATA *) top( &dfs_stack );
-					if( !add_J_NODE_to_jobject( &(top_node->j_data), new_node ) )
-						goto END;
-
-					RESET_ENV ( &env ); 	
-					if( is_list_filling( env->FLAG ) )
-						list_action( &env );
-					else env->FLAG = 0b00000;
 					flushed_before = COMMA_FLUSH;
 					break;
 				}
@@ -380,35 +412,24 @@ JSON_NODE* parse_JSON_from_FILE( FILE* JSON_file ){
 					env->FLAG = turn_on( env->FLAG, KEY_ENTERED );
 					terminate_string( env->key, env->k_index );
 				}
-				else{
-					env->FLAG = turn_on ( env->FLAG, VALUE_ENTERED );
-					env->FLAG = turn_off( env->FLAG, SOMETHING_INPUTING );
-					terminate_string( env->value, env->v_index );
-				}
+				else terminate_value_if_filling( &env );	
 			}
 		}// else if
 		else{
 			if( isspace( c_char ) && !is_in_filling_mode( env->FLAG )) continue;
-			if( isspace( c_char ) && is_in_filling_mode( env->FLAG ) 
-								  && !is_string_inputing( env->FLAG )){
-				env->FLAG = turn_off( env->FLAG, SOMETHING_INPUTING );
-				env->FLAG = turn_on( env->FLAG, VALUE_ENTERED );
-				terminate_string( env->value, env->v_index );
+			if( isspace( c_char ) && is_in_filling_mode( env->FLAG ) && !is_string_inputing( env->FLAG )){
+				terminate_value_if_filling( &env );	
 				continue;
 			}
-			if( c_char == '\\' ) c_char = _getc();
+			fill_inputs( &env, c_char );
 
-			if( is_value_licensed( env->FLAG ) ){
-				env->FLAG = turn_off( env->FLAG, VALUE_LICENSE );
-				env->FLAG = turn_on( env->FLAG, SOMETHING_INPUTING );
+			if( c_char == '\\' ){
+				int temp = _getc();
+				fill_inputs( &env, temp );
 			}
-			if( !is_in_filling_mode( env->FLAG ) ){
-				PARSER_ERR_RAISED = PARSER_SYNTAX_ERROR;
+
+			if( PARSER_ERR_RAISED != NO_PARSER_ERROR )
 				goto END;
-			}
-			( !is_key_filled( env->FLAG ) ) \
-				? safe_push( env->key, &(env->k_index), c_char, MAX_KEY_SIZE )
-				: safe_push( env->value, &(env->v_index), c_char, MAX_VALUE_SIZE );
 			
 		}// else
 		flushed_before = NO_FLUSH_HAPPENDED;	

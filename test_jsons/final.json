@@ -1,0 +1,62 @@
+{
+  "simple_string": "hello world",
+  "string_with_quotes": "He said \"Hello\" to her",
+  "string_with_backslash": "C:\\Users\\Admin\\Desktop",
+  "string_with_escape_chars": "Line1\nLine2\tTabbed\\Slash\"Quote\"",
+  "string_with_unicode": "Snowman: \u2603, Heart: \u2764, Malayalam: \u0D2E\u0D32\u0D2F\u0D3E\u0D33\u0D02",
+  "numbers": {
+    "int": 12345,
+    "negative_int": -987,
+    "float": 123.456,
+    "negative_float": -12.34,
+    "exponent_positive": 1.23e+10,
+    "exponent_negative": 9.1e-05
+  },
+  "booleans_and_null": {
+    "true_val": true,
+    "false_val": false,
+    "nothing": null
+  },
+  "arrays": {
+    "empty_array": [],
+    "simple_array": [1, 2, 3, 4],
+    "mixed_array": [true, 123, "text", null, 45.6],
+    "nested_array": [
+      [1, 2],
+      ["a", "b", "c"],
+      [
+        true,
+        false,
+        [10, 20, ["deep", { "key": "value" }]]
+      ]
+    ]
+  },
+  "objects": {
+    "empty_object": {},
+    "simple_object": { "a": 1, "b": 2 },
+    "nested_object": {
+      "level1": {
+        "level2": {
+          "level3": {
+            "level4": "deep value"
+          }
+        }
+      }
+    }
+  },
+  "special_keys": {
+    "space key": "value",
+    "123numeric": "numeric key allowed",
+    "_underscore": "ok",
+    "-hyphen-key": "ok",
+    "emoji_key_😀": "emoji supported",
+    "unicode_key_മലയാളം": "yes"
+  },
+  "edge_cases": {
+    "empty_string": "",
+    "long_string": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "escaped_newline_literal": "This is not real newline: \\n literal",
+    "escaped_tab_literal": "Tab literal: \\t okay",
+    "many_escapes": "\\\\ \\/ \\b \\f \\n \\r \\t"
+  }
+}

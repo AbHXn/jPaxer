@@ -9,7 +9,7 @@
         "country": "India",
         "state": "Kerala",
         "coordinates": {
-          "lat": 10.8505,
+          "lat": -10e4,
           "lng": 76.2711
         }
       },
