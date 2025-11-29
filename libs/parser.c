@@ -1,12 +1,9 @@
 #include "parser.h"
 
 
-/*
-	implemeted many flags for minute error checking but not implemented properly
-*/
-
 PARSER_ERROR PARSER_ERR_RAISED = NO_PARSER_ERROR;
 static short int stack_limit_counter = 0;
+size_t 			 line_number = 1;
 
 static inline bool is_value_filling( int _flag ){
 	return !is_value_filled ( _flag ) && is_in_filling_mode	( _flag );
@@ -25,8 +22,20 @@ static inline void terminate_string( char *str, const int index ){
 	if( *( str  + index ) != '\0' ) *( str + index ) = '\0';
 }
 
+static inline bool value_string_inputing( int _flag ){
+	return is_in_filling_mode( _flag ) && is_key_filled( _flag ) && is_string_inputing( _flag ) ;
+}
+
 static inline int get_next_not_space( void ){
-	int temp; while( isspace(temp = _getc( )) ); return temp;
+	int temp; 
+	while( (temp = _getc( )) != EOF ){
+		if( isspace( temp ) ){
+			if( temp == '\n' ) ++line_number;
+			continue;
+		}
+		break;
+	}
+	return temp;
 }
 
 /* check if the list reading is completed else convert the index to string and return the suitable flag */
@@ -34,7 +43,8 @@ static inline void list_action ( WORKING_ENV** cur_node ){
 	if( !cur_node || *cur_node == NULL ) return;
 
 	int temp = get_next_not_space();
-	push_char_buffer( temp );
+	if( temp != COMMA )
+		push_char_buffer( temp );
 	if( temp == CLOSE_S ) return;
 
 	char list_index_str[ MAX_KEY_DIGIT ];
@@ -163,8 +173,14 @@ JSON_NODE* get_full_JSON_NODE_pair_from_env( WORKING_ENV* env ){
 
 	if( !value_ptr && cur_value_type == J_SKIP ){
 		cur_value_type = non_returned_dtype( env->value );
-		if( cur_value_type == J_STRING )
-			value_ptr = get_string( env->value );
+		if( cur_value_type == J_STRING ){
+			if ( is_string_inputing( env->FLAG ) )
+				value_ptr = get_string( env->value );
+			else {
+				PARSER_ERR_RAISED = PARSER_SYNTAX_ERROR;
+				return NULL;
+			}
+		}
 	}
 	JSON_NODE* new_node = get_jnode( env->key );
 	if( !new_node ){
@@ -186,6 +202,8 @@ bool FLUSH_THE_STACK( WORKING_ENV** env, STACK** dfs_stack ){
 
 	if( is_key_value_pair( cur_env->FLAG ) ){
 		JSON_NODE* new_pair = get_full_JSON_NODE_pair_from_env( cur_env );
+		if( !new_pair ) return false;
+		
 		add_parent_info_from_stack( &new_pair, *dfs_stack );
 		if( !add_J_NODE_to_jobject( &(top_stack_data->j_data), new_pair ) )
 			return false;
@@ -200,10 +218,17 @@ bool FLUSH_THE_STACK( WORKING_ENV** env, STACK** dfs_stack ){
 	STACK_DATA* new_top_stack_data = ( STACK_DATA* ) top( dfs_stack );
 	if( !new_top_stack_data ){
 		push_stack( top_stack_data, dfs_stack );
+		++stack_limit_counter;
 		return true;
 	}
 	return add_J_NODE_to_jobject( &(new_top_stack_data->j_data), top_stack_data->j_data );
 }
+
+typedef enum {
+	NO_FLUSH_HAPPENDED,
+	COMMA_FLUSH		  ,
+	CLOSSING_FLUSH    ,
+}FLUSH_TYPE;
 
 JSON_NODE* parse_JSON_from_FILE( FILE* JSON_file ){
 	if( !JSON_file ){
@@ -211,12 +236,11 @@ JSON_NODE* parse_JSON_from_FILE( FILE* JSON_file ){
 		return NULL;
 	}
 	
-	JSON_FILE = JSON_file;
-	int    c_char;
-	STACK* dfs_stack 		= NULL;
-	bool   flushed_before   = false;
-
-	WORKING_ENV* env = init_working_env();
+	int c_char;
+	JSON_FILE 					= JSON_file;
+	STACK* dfs_stack 			= NULL;
+	FLUSH_TYPE flushed_before 	= NO_FLUSH_HAPPENDED;
+	WORKING_ENV* env 			= init_working_env();
 	
 	if( !env ){
 		PARSER_ERR_RAISED = PARSER_ALLOCATION_ERROR;
@@ -224,15 +248,18 @@ JSON_NODE* parse_JSON_from_FILE( FILE* JSON_file ){
 	}
 	strcpy( env->key, "DICT" );
 	env->FLAG = turn_on( env->FLAG, KEY_ENTERED );
-	size_t line_number = 1;
 
 	while( ( c_char = _getc() ) != EOF ){
 		if( c_char == '\n' ) ++line_number;
 		
-		if( is_json_syntax( c_char ) && !is_string_inputing( env->FLAG ) && c_char != APPO ){
+		if( is_json_syntax( c_char ) && c_char != APPO && !value_string_inputing( env->FLAG )){
 			switch ( c_char ){
 				case CLOSE_C: 
 				case CLOSE_S:  {
+					if( flushed_before == COMMA_FLUSH ){
+						PARSER_ERR_RAISED = PARSER_SYNTAX_ERROR;
+						goto END;
+					}
 					if( is_in_filling_mode( env->FLAG ) ){
 						env->FLAG = turn_off( env->FLAG, SOMETHING_INPUTING );
 						env->FLAG = turn_on( env->FLAG, VALUE_ENTERED );
@@ -240,10 +267,12 @@ JSON_NODE* parse_JSON_from_FILE( FILE* JSON_file ){
 					}
 					if( !FLUSH_THE_STACK( &env, &dfs_stack ) ){
 						ERROR(stderr, "Stack Flush Error\n");
-						PARSER_ERR_RAISED = PARSER_INTERNAL_ERROR;
-						break;
+						if( PARSER_ERR_RAISED == NO_PARSER_ERROR ){
+							PARSER_ERR_RAISED = PARSER_INTERNAL_ERROR;
+						}
+						goto END;
 					}
-					if( dfs_stack != NULL ){
+					if( dfs_stack ){
 						STACK_DATA* top_node = ( STACK_DATA* ) top( &dfs_stack );
 						RESET_ENV( &env );
 						env->FLAG = top_node->FLAG;
@@ -253,7 +282,7 @@ JSON_NODE* parse_JSON_from_FILE( FILE* JSON_file ){
 					
 					if( is_list_filling( env->FLAG ) )
 						list_action( &env );
-					flushed_before = true;
+					flushed_before = CLOSSING_FLUSH;
 					break;
 				}
 				case OPEN_S:
@@ -275,7 +304,7 @@ JSON_NODE* parse_JSON_from_FILE( FILE* JSON_file ){
 					new_node->multiple_values  = ( c_char == OPEN_S ) ? true: false; 
 					new_node->value.object_val = NULL;
 
-					if( dfs_stack != NULL ){
+					if( dfs_stack ){
 						STACK_DATA* top_node = ( STACK_DATA* ) top( &dfs_stack );
 						top_node->list_index = env->list_index;
 						top_node->FLAG 		 = env->FLAG;
@@ -301,27 +330,30 @@ JSON_NODE* parse_JSON_from_FILE( FILE* JSON_file ){
 					env->FLAG = turn_on( env->FLAG, VALUE_LICENSE );
 					break;
 				}
-				case COMMA : {  
-					if( flushed_before ){ flushed_before = false; break; }
-
+				case COMMA : { 
+					if( flushed_before == CLOSSING_FLUSH ){
+						flushed_before = COMMA_FLUSH;
+						break;
+					}else if( flushed_before == COMMA_FLUSH ){
+						PARSER_ERR_RAISED = PARSER_SYNTAX_ERROR;
+						goto END;
+					}
 					bool eligible = is_key_filled( env->FLAG ) && \
-									(is_value_filling( env->FLAG ) 
-									|| is_value_filled (env->FLAG));
+									(is_value_filling( env->FLAG ) || is_value_filled (env->FLAG));
 
 					if( !eligible ){
 						PARSER_ERR_RAISED = PARSER_SYNTAX_ERROR;
 						goto END;
 					}
-
 					if( is_value_filling(env->FLAG) ){
 						env->FLAG = turn_off( env->FLAG, SOMETHING_INPUTING );
 						env->FLAG = turn_on( env->FLAG, VALUE_ENTERED );
 						terminate_string( env->value, env->v_index );
 					}
 					JSON_NODE* new_node = get_full_JSON_NODE_pair_from_env( env );
-					add_parent_info_from_stack( &new_node, dfs_stack );
-					if( !new_node ) break;
-
+					if( !new_node ) goto END;
+ 					
+ 					add_parent_info_from_stack( &new_node, dfs_stack );
 					STACK_DATA* top_node = (STACK_DATA *) top( &dfs_stack );
 					if( !add_J_NODE_to_jobject( &(top_node->j_data), new_node ) )
 						goto END;
@@ -330,9 +362,11 @@ JSON_NODE* parse_JSON_from_FILE( FILE* JSON_file ){
 					if( is_list_filling( env->FLAG ) )
 						list_action( &env );
 					else env->FLAG = 0b00000;
+					flushed_before = COMMA_FLUSH;
 					break;
 				}
 			} // switch
+			continue;
 		}// if
 		else if( c_char == APPO ){
 			if( !is_in_filling_mode( env->FLAG ) ){
@@ -342,13 +376,13 @@ JSON_NODE* parse_JSON_from_FILE( FILE* JSON_file ){
 			}
 			else{
 				if( !is_key_filled( env->FLAG ) ){
-					env->FLAG = turn_off(env->FLAG, SOMETHING_INPUTING | STRING_INPUTING);
+					env->FLAG = turn_off(env->FLAG, SOMETHING_INPUTING | STRING_INPUTING );
 					env->FLAG = turn_on( env->FLAG, KEY_ENTERED );
 					terminate_string( env->key, env->k_index );
 				}
 				else{
 					env->FLAG = turn_on ( env->FLAG, VALUE_ENTERED );
-					env->FLAG = turn_off( env->FLAG, SOMETHING_INPUTING | STRING_INPUTING );
+					env->FLAG = turn_off( env->FLAG, SOMETHING_INPUTING );
 					terminate_string( env->value, env->v_index );
 				}
 			}
@@ -376,21 +410,13 @@ JSON_NODE* parse_JSON_from_FILE( FILE* JSON_file ){
 				? safe_push( env->key, &(env->k_index), c_char, MAX_KEY_SIZE )
 				: safe_push( env->value, &(env->v_index), c_char, MAX_VALUE_SIZE );
 			
-		}// else	
+		}// else
+		flushed_before = NO_FLUSH_HAPPENDED;	
 	}
 	END:
 	if( PARSER_ERR_RAISED != NO_PARSER_ERROR ) {
-		if( PARSER_ERR_RAISED == PARSER_SYNTAX_ERROR ){
-			int ptr = 0;
-			const char* err_string = get_string_some_range( 10, &ptr );
-			SYNTAX_ERROR ( line_number );
-			if( strlen(err_string) > 0 ){
-				ERROR(stderr, "\033[1;31m%s\033[0m\n", err_string);
-				while( --ptr > 0 ) putchar(' ');
-			}
-			else ERROR(stderr, "\033[1;31m%c\033[0m\n", c_char);
-			puts("^");
-		}
+		if( PARSER_ERR_RAISED == PARSER_SYNTAX_ERROR )
+			PRINT_SYNTAX_ERROR( line_number, c_char );
 		else ERROR(stderr, "Error occured..terminating..\n");
 		free_memory();
 		return NULL;

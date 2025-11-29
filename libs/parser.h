@@ -6,6 +6,7 @@
 #define 	MAX_KEY_DIGIT	 10
 #define 	BUFFER_SIZE 	 250
 #define 	MAX_SPACE 		 100
+#define 	ERR_BUFF_SIZE    20
 
 #include <stdio.h>
 #include <stdbool.h>
@@ -89,7 +90,15 @@ bool 		 FLUSH_THE_STACK ( WORKING_ENV** env, STACK** dfs_stack )			 ;
 JSON_NODE* 	 parse_JSON_from_FILE ( FILE*  )									 ;
 void 		 add_parent_info_from_stack( JSON_NODE** new_node, STACK* dfs_stack );
 
-static void SYNTAX_ERROR( size_t line_number ){
+static void PRINT_SYNTAX_ERROR( size_t line_number, int c_char ){
+	int ptr = 0;
+	const char* err_string = get_string_some_range( ERR_BUFF_SIZE, &ptr );
 	fprintf(stderr, "Json Syntax Error at %ld: \n", line_number);
+	if( strlen(err_string) > 0 ){
+		ERROR(stderr, "\033[1;31m%s\033[0m\n", err_string);
+		while( --ptr > 0 ) putchar(' ');
+	}
+	else ERROR(stderr, "\033[1;31m%c\033[0m\n", c_char);
+	puts("^");
 }
 #endif // JSON_PARSER_H
