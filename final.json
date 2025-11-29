@@ -1,48 +1,61 @@
- {
-     "productName": "Advanced JSON Parser Test Suite",
-     "version": 3.100000,
-     "isAvailable": true,
-     "metadata": 
+ [
+     
      {
-         "creationDate": "2025-11-13",
-         "author": "AI Assistant"
+         "name": "Project Alpha",
+         "status": "In Progress",
+         "tasksCompleted": 5,
+         "priority": 1,
+         "details": 
+         {
+             "lead": "Alice",
+             "startDate": "2025-01-15"
+         },
+         "teamMembers": 
+         [
+             "Alice",
+             "Bob",
+             "Charlie"
+         ]
      },
-     "configurations": 
-     [
-         
+     
+     {
+         "name": "Project Beta",
+         "status": "Pending",
+         "tasksCompleted": 0,
+         "priority": 2,
+         "details": 
          {
-             "setting": "high_fidelity",
-             "status": "active",
-             "params": 
-             [
-                 50,
-                 100,
-                 150
-             ]
+             "lead": "Eve",
+             "startDate": "2026-03-01"
          },
-         
+         "teamMembers": 
+         [
+
+         ]
+     },
+     
+     {
+         "name": "Project Gamma",
+         "status": "Completed",
+         "tasksCompleted": 12,
+         "priority": 3,
+         "details": 
          {
-             "id": 102,
-             "setting": "low_power",
-             "status": "standby",
-             "params": 
-             [
-                 10,
-                 20
-             ]
+             "lead": "David",
+             "startDate": "2024-06-20"
          },
-         
-         {
-             "id": 103,
-             "setting": "default",
-             "status": "inactive"
-         }
-     ],
-     "dependencies": 
-     [
-         "library_a",
-         "library_b",
-         "library_c"
-     ],
-     "nullField": null
- }
+         "milestones": 
+         [
+             
+             {
+                 "date": "2024-07-01",
+                 "desc": "Phase 1 Complete"
+             },
+             
+             {
+                 "date": "2024-09-15",
+                 "desc": "Final Review"
+             }
+         ]
+     }
+ ]

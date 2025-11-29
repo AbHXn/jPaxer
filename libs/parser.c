@@ -304,6 +304,15 @@ JSON_NODE* parse_JSON_from_FILE( FILE* JSON_file ){
 				case COMMA : {  
 					if( flushed_before ){ flushed_before = false; break; }
 
+					bool eligible = is_key_filled( env->FLAG ) && \
+									(is_value_filling( env->FLAG ) 
+									|| is_value_filled (env->FLAG));
+
+					if( !eligible ){
+						PARSER_ERR_RAISED = PARSER_SYNTAX_ERROR;
+						goto END;
+					}
+
 					if( is_value_filling(env->FLAG) ){
 						env->FLAG = turn_off( env->FLAG, SOMETHING_INPUTING );
 						env->FLAG = turn_on( env->FLAG, VALUE_ENTERED );
@@ -370,18 +379,17 @@ JSON_NODE* parse_JSON_from_FILE( FILE* JSON_file ){
 		}// else	
 	}
 	END:
-	if( PARSER_ERR_RAISED != NO_PARSER_ERROR) {
+	if( PARSER_ERR_RAISED != NO_PARSER_ERROR ) {
 		if( PARSER_ERR_RAISED == PARSER_SYNTAX_ERROR ){
-			int *ptr = _malloc( sizeof( int ) );
-			if( ptr == NULL ){
-				ERROR(stderr, "For errors error occured\n");
-				return NULL;
-			}
-			const char* err_string = get_string_some_range( 10, ptr);
+			int ptr = 0;
+			const char* err_string = get_string_some_range( 10, &ptr );
 			SYNTAX_ERROR ( line_number );
-			printf("\n\033[1;31m%s\033[0m\n", err_string);
-			while( --(*ptr) > 0 ) putchar(' ');
-			puts("^\n");
+			if( strlen(err_string) > 0 ){
+				ERROR(stderr, "\033[1;31m%s\033[0m\n", err_string);
+				while( --ptr > 0 ) putchar(' ');
+			}
+			else ERROR(stderr, "\033[1;31m%c\033[0m\n", c_char);
+			puts("^");
 		}
 		else ERROR(stderr, "Error occured..terminating..\n");
 		free_memory();

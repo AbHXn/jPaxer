@@ -2,7 +2,7 @@
 #include "libs/jpaxer.h"
 
 int main( int argc, char *argv[] ){
-	FILE* jfile = fopen( "test_jsons/test1.json", "r" );
+	FILE* jfile = fopen( argv[1], "r" );
 	JSON_NODE* p_json = parse_JSON_from_FILE( jfile );
 	get( p_json, "configurations" );
 	get( p_json, "0" );
