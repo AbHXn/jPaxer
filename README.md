@@ -68,7 +68,7 @@ JPAXER provides structured error handling:
 
 int main() {
 	// open json file
-    FILE* jfile1 = fopen( "test_jsons/test1.json", "r" );
+    FILE* jfile1 = fopen( "jfiles/test1.json", "r" );
 
 	if( !jfile1 ){
 		fprintf(stderr, "Failed to open json file");
@@ -78,7 +78,7 @@ int main() {
 	JSON_NODE* first_json = parse_JSON_from_FILE( jfile1 );
 	fclose( jfile1 );
 
-	FILE* jfile2 = fopen( "test_jsons/test2.json", "r" );
+	FILE* jfile2 = fopen( "jfiles/test2.json", "r" );
 
 	if( !jfile2 ){
 		fprintf(stderr, "Failed to open json file");

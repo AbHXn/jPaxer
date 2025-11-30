@@ -1,7 +1,7 @@
 #ifndef JPAXER_H
 #define JPAXER_H
 
-#include "parser.h"
+#include "libs/parser.h"
 #include <stdarg.h>
 #include <stdio.h>
 
