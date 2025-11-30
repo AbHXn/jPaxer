@@ -32,7 +32,7 @@ static inline void list_action ( WORKING_ENV** cur_node ){
 
 	char list_index_str[ MAX_KEY_DIGIT ];
 
-	snprintf( list_index_str, MAX_KEY_SIZE, "%d", (*cur_node)->list_index );	
+	snprintf( list_index_str, MAX_KEY_DIGIT, "%d", (*cur_node)->list_index );	
 	push_char_buffer( SEMI );
 	push_char_buffer( APPO );
 	push_string( list_index_str );
@@ -94,7 +94,7 @@ STACK_DATA* get_stack_data( JSON_NODE* j_data ){
 	STACK_DATA* n_stack_data = _malloc( sizeof( STACK_DATA ) );
 	if( !n_stack_data ){
 		ERROR(stderr,"failed to create new parser error");
-		PARSER_ERR_RAISED = NO_PARSER_ERROR;
+		PARSER_ERR_RAISED = PARSER_ALLOCATION_ERROR;
 		return NULL;
 	}
 	n_stack_data->j_data	 = j_data;
@@ -203,7 +203,6 @@ bool FLUSH_THE_STACK( WORKING_ENV** env, STACK** dfs_stack ){
 	STACK_DATA* new_top_stack_data = ( STACK_DATA* ) top( dfs_stack );
 	if( !new_top_stack_data ){
 		push_stack( top_stack_data, dfs_stack );
-		++stack_limit_counter;
 		return true;
 	}
 	return add_J_NODE_to_jobject( &(new_top_stack_data->j_data), top_stack_data->j_data );
