@@ -142,7 +142,6 @@ void add_parent_info_from_stack( JSON_NODE** new_node, STACK* dfs_stack ){
 
 JSON_NODE* get_full_JSON_NODE_pair_from_env( WORKING_ENV* env, bool is_string ){
 	if( env->FLAG != KEY_VALUE_PAIR ){
-		puts("sfd");
 		PARSER_ERR_RAISED = PARSER_SYNTAX_ERROR;
 		return NULL;
 	}
@@ -318,8 +317,6 @@ JSON_NODE* parse_JSON_from_FILE( FILE* JSON_file ){
 		PARSER_ERR_RAISED = PARSER_ALLOCATION_ERROR;
 		return NULL;
 	}
-	puts("here");
-
 	strcpy( env->key, "DICT" );
 	env->FLAG = KEY_ENTERING;
 
