@@ -194,6 +194,14 @@ void fill_value_acc( JSON_NODE** new_node, void* value_data, JSON_DTYPE type ){
 		case J_NULL:
 			memset(&(*new_node)->value, 0, sizeof((*new_node)->value));
 			break;
+		case J_OBJECT:
+			jobject* nnode = get_jobject( ( JSON_NODE* ) value_data );
+            if( !nnode ){
+                fprintf(stderr, "failed to update node\n");
+                return;
+            }
+           (*new_node)->value.object_val = nnode;
+            return;
 		default: break;
 	}
 }
@@ -211,7 +219,6 @@ JSON_NODE* get_jnode( const char *key ){
 	nnode->key = (char *) _malloc( strlen(key) + 1 );
 	if( !nnode->key ){
 		OBJECT_ERR_RAISED = OBJECT_KEY_VALUE_ALLOC_ERROR;
-		//free( nnode );
 		return NULL;
 	}
 	strcpy( nnode->key, key );

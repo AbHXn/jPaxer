@@ -45,12 +45,12 @@ extern READ_ERRORS READ_ERR_RAISED;
 const char* get_read_error_msg( READ_ERRORS err_raised );
 READ_ERRORS get_read_error( void );
 
-bool 		push_string 	 	( const char* ) ;
-bool 		reverse_pointer  	( size_t reverse_size ) ;
-bool 		push_char_buffer	( const char s ) ;
-void  		load_next_buffer 	( size_t x ) ;
-int  		_getc				( void ) ;
-void 		strip 				( char * ) ;
-char* get_string_some_range (size_t, int*);
-
+bool 		push_string 	 	  ( const char* ) ;
+bool 		reverse_pointer  	  ( size_t reverse_size ) ;
+bool 		push_char_buffer	  ( const char s ) ;
+void  		load_next_buffer 	  ( size_t x ) ;
+int  		_getc				  ( void ) ;
+void 		strip 				  ( char * ) ;
+char*       get_string_some_range (size_t, int*);
+void 		flush_buffer		  ( void );
 #endif

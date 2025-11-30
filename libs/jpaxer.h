@@ -31,4 +31,9 @@ void   __back__	 ( JSON_NODE**, int);
 #define del(j_node,key)				__delete__((&j_node),(key))
 #define back(j_node,step)			__back__((&j_node),(step))
 
+void* get_J_INT		( long int data );
+void* get_J_DOUBLE	( double data );
+void* get_J_BOOL	( bool data );
+void* get_J_STRING	( char* data );
+
 #endif

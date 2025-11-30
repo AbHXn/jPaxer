@@ -318,6 +318,8 @@ JSON_NODE* parse_JSON_from_FILE( FILE* JSON_file ){
 		PARSER_ERR_RAISED = PARSER_ALLOCATION_ERROR;
 		return NULL;
 	}
+	puts("here");
+
 	strcpy( env->key, "DICT" );
 	env->FLAG = KEY_ENTERING;
 
@@ -391,7 +393,6 @@ JSON_NODE* parse_JSON_from_FILE( FILE* JSON_file ){
 		else{
 			if( isspace( c_char ) &&  env->FLAG != KEY_ENTERING && env->FLAG != VALUE_ENTERING ) continue;
 			if( isspace( c_char ) && !string_flag ){
-				// puts("running here");
 				terminate_value_if_filling( &env );	
 				continue;
 			}
@@ -415,5 +416,6 @@ JSON_NODE* parse_JSON_from_FILE( FILE* JSON_file ){
 		free_memory();
 		return NULL;
 	}
+	flush_buffer();
 	return (JSON_NODE*) (((STACK_DATA* ) top( &dfs_stack ))->j_data);
 }

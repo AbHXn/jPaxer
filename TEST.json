@@ -1,0 +1,24 @@
+  {
+      "id": 101,
+      "setting": "high_fidelity",
+      "status": "active",
+      "params": 
+      [
+          
+          [
+              "Alice",
+              "Bob",
+              "Charlie"
+          ]
+      ],
+      "new_details": 
+      {
+          "details": 
+          {
+              "lead": "Alice",
+              "startDate": "2025-01-15"
+          }
+      },
+      "whoisthis": "admin",
+      "user_id": 123
+  }

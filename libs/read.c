@@ -151,6 +151,14 @@ int _getc( void ){
 	return EOF;
 }
 
+void flush_buffer( void ){
+	counter 		 = NULL;
+	byte_read 		 = 0;
+	READ_ERR_RAISED  = NO_READ_ERRORS;
+	JSON_FILE 		 = NULL;
+	memset( file_reader_buffer, 0, MAX_READ_SIZE + SAFE_SIZE );
+}
+
 void _ungetc(void) {
     if(counter > file_reader_buffer)
         counter--;
