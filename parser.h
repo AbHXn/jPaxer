@@ -13,10 +13,10 @@
 #include <ctype.h>
 #include <string.h>
 
-#include "alloc.h"
-#include "read.h"
+#include "libs/alloc.h"
+#include "libs/read.h"
+#include "libs/stack.h"
 #include "object.h"
-#include "stack.h"
 
 
 #define ERROR(file, fmt, ...) fprintf(file, fmt, ##__VA_ARGS__)
