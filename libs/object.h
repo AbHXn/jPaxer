@@ -52,12 +52,23 @@ typedef enum _jobject_errors{
 	OBJECT_ERR_ENDS		
 }OBJECT_ERRORS;
 
-extern const char* _OBJ_ERR_TYPE;
+typedef enum {
+	OPEN_C 		= '{',
+	CLOSE_C		= '}',
+	OPEN_S 		= '[',
+	CLOSE_S 	= ']',
+	APPO 		= '"',
+	SEMI	 	= ':',
+	COMMA 		= ','
+}J_SYNTAX;
 
+
+extern const char* _OBJ_ERR_TYPE;
 extern OBJECT_ERRORS OBJECT_ERR_RAISED;
 
 const char* get_object_error_msg( OBJECT_ERRORS err_raised );
 OBJECT_ERRORS get_object_error( void );
+
 
 static const char* object_err_msgs[] = {
 	"no error raised\n",
@@ -68,12 +79,12 @@ static const char* object_err_msgs[] = {
 	"json object tree allocation error\n"
 };
 
-
 void* 		get_dtype( const char* , JSON_DTYPE* );
 JSON_NODE*  get_jnode( const char * );
 JSON_DTYPE	non_returned_dtype( const char * );
 jobject* 	get_jobject( JSON_NODE*  );
 void 		fill_value_acc( JSON_NODE** , void* , JSON_DTYPE  );
 void* 		get_string( const char* );
+bool 		is_json_syntax( char c );
 
 #endif

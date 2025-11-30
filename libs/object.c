@@ -21,6 +21,19 @@ OBJECT_ERRORS get_object_error( void ){
 	return err_raised;
 }
 
+
+bool is_json_syntax( char c ){
+	switch( c ) {
+		case OPEN_C	: case CLOSE_C	:
+		case OPEN_S	: case APPO		:
+		case SEMI	: case CLOSE_S	:
+		case COMMA	:
+			return true;
+		default:
+			return false;
+	}
+}
+
 static bool parse_long_safe( const char* str, long* out ){
     if ( !str || !*str ) 
     	return false;

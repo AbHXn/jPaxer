@@ -18,16 +18,6 @@
 #include "object.h"
 #include "stack.h"
 
-typedef enum status_flags INPUT_STATUS;
-
-#define is_key_filled(flag) 	  ((flag) & KEY_ENTERED)
-#define is_value_filled(flag) 	  ((flag) & VALUE_ENTERED)
-#define is_in_filling_mode(flag)  ((flag) & SOMETHING_INPUTING)
-#define is_list_filling(flag) 	  ((flag) & LIST_INPUTING)
-#define is_value_licensed(flag)	  ((flag) & VALUE_LICENSE)
-#define is_string_inputing(flag)  ((flag) & STRING_INPUTING)
-#define turn_on(flag, mask)		  ((flag) | (mask))
-#define turn_off(flag, mask)	  ((flag) & ~(mask))
 
 #define ERROR(file, fmt, ...) fprintf(file, fmt, ##__VA_ARGS__)
 
@@ -37,30 +27,20 @@ extern int 		BUFFER[BUFFER_SIZE];
 extern int 		buffer_ptr;
 extern FILE* 	JSON_FILE;
 
-typedef enum {
-	OPEN_C 		= '{',
-	CLOSE_C		= '}',
-	OPEN_S 		= '[',
-	CLOSE_S 	= ']',
-	APPO 		= '"',
-	SEMI	 	= ':',
-	COMMA 		= ','
-}J_SYNTAX;
-
-typedef enum status_flags{
-	SOMETHING_INPUTING		= 1 << 0,
-	VALUE_ENTERED			= 1 << 1,
-	KEY_ENTERED 			= 1 << 2,
-	LIST_INPUTING			= 1 << 3,
-	STRING_INPUTING			= 1 << 4,
-	VALUE_LICENSE			= 1 << 5,
-}INPUT_STATUS;
 
 typedef enum {
 	NO_FLUSH_HAPPENDED,
 	COMMA_FLUSH		  ,
 	CLOSSING_FLUSH    ,
 }FLUSH_TYPE;
+
+
+typedef enum{
+	KEY_ENTERING  = 1,
+	VALUE_LICENSE = 2,
+	VALUE_ENTERING= 3,
+	KEY_VALUE_PAIR= 4
+}STATE_FLAGS;
 
 
 typedef struct _env{
@@ -92,7 +72,7 @@ extern PARSER_ERROR PARSER_ERR_RAISED;
 
 STACK_DATA*  get_stack_data ( JSON_NODE* j_data )								 ;
 bool 		 add_J_NODE_to_jobject ( JSON_NODE** j_node, JSON_NODE* push_node )	 ;
-JSON_NODE* 	 get_full_JSON_NODE_pair_from_env ( WORKING_ENV* env )				 ;
+JSON_NODE* 	 get_full_JSON_NODE_pair_from_env ( WORKING_ENV* env, bool )				 ;
 bool 		 FLUSH_THE_STACK ( WORKING_ENV** env, STACK** dfs_stack )			 ;
 JSON_NODE* 	 parse_JSON_from_FILE ( FILE*  )									 ;
 void 		 add_parent_info_from_stack( JSON_NODE** new_node, STACK* dfs_stack );

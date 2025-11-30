@@ -13,8 +13,8 @@ int main( int argc, char *argv[] ){
 
 	print_JSON_node( p_json );
 
-	FILE* jile = fopen( "TEST.json", "w" );
-	JSON_FLUSH( p_json, jile, 2 );
+	// FILE* jile = fopen( "TEST.json", "w" );
+	// JSON_FLUSH( p_json, jile, 2 );
 
 	return 0;
 }
