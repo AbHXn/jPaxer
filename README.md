@@ -139,6 +139,6 @@ JPAXER is released for educational purposes and personal learning projects. You 
 
 ## Disclaimer
 
-* JPAXER is **not production-ready**.
-* Use with care, especially regarding memory allocation, as improper usage may lead to memory leaks or undefined behavior.
-* Error handling is designed for debugging and learning rather than complete fault tolerance.
+JPAXER is not completely production-ready.
+I have verified all major dangerous parts, including memory leaks, dangling pointers, and out-of-bounds access.
+Use with care, as error handling is primarily designed for debugging and learning rather than full fault tolerance.
