@@ -17,14 +17,32 @@ static inline void terminate_string( char *str, const int index ){
 static inline void list_action ( WORKING_ENV** cur_node ){
 	if( !cur_node || *cur_node == NULL ) return;
 
-	int temp; 
-	while( (temp = _getc( )) != EOF ){
+
+	int temp;
+	while( counter < end_ptr ){
+		temp = *counter;
+		if( counter + 1 == end_ptr ){
+			load_next_buffer( 0 );
+			counter--; // safe limit
+		}
+		counter++;
 		if( isspace( temp ) ){
-			if( temp == '\n' ) ++line_number;
+			if( temp =='\n' )
+				line_number++;
 			continue;
 		}
 		break;
 	}
+
+
+	// int temp; 
+	// while( (temp = _getc( )) != EOF ){
+	// 	if( isspace( temp ) ){
+	// 		if( temp == '\n' ) ++line_number;
+	// 		continue;
+	// 	}
+	// 	break;
+	// }
 
 	if( temp != COMMA )
 		push_char_buffer( temp );
@@ -115,23 +133,29 @@ bool add_J_NODE_to_jobject( JSON_NODE** j_node, JSON_NODE* push_node ){
 		PARSER_ERR_RAISED = PARSER_INTERNAL_ERROR;
 		return false;
 	}
+	
 	jobject* n_jobj = get_jobject( push_node );
+	n_jobj->prev = n_jobj;
+
 	if( !n_jobj ){ 
 		ERROR(stderr, "%s\n", get_object_error_msg( get_object_error() ));
 		PARSER_ERR_RAISED = PARSER_EXTERNAL_ERROR;
 		return false;
 	} 
+	
 	jobject* lists_objs = (*j_node)->value.object_val;
+
 	if( !lists_objs ){
 		(*j_node)->value.object_val = n_jobj;
 		return true;
 	}
-	while( lists_objs->next )
-		lists_objs = lists_objs->next;
-	lists_objs->next = n_jobj;
+	
+	n_jobj->prev = lists_objs->prev;
+	lists_objs->prev->next = n_jobj;
+	lists_objs->prev = n_jobj;
+
 	return true;
 }
-
 void add_parent_info_from_stack( JSON_NODE** new_node, STACK* dfs_stack ){
 	if( !dfs_stack || !new_node || *new_node == NULL) 
 		return;
@@ -308,21 +332,55 @@ JSON_NODE* parse_JSON( READER* JSON_READER ){
 	int c_char;
 
 	JSON_READER_OBJECT 			= JSON_READER;
+
 	STACK* dfs_stack 			= NULL;
+	
 	FLUSH_TYPE flushed_before 	= NO_FLUSH_HAPPENDED;
+	
 	WORKING_ENV* env 			= init_working_env();
-	bool string_flag			= false;
 	
 	if( !env ){
 		PARSER_ERR_RAISED = PARSER_ALLOCATION_ERROR;
 		return NULL;
 	}
 
+	bool skip 		 = false;
+	bool string_flag = false;
+
 	strcpy( env->key, "DICT" );
 	env->FLAG = KEY_ENTERING;
 
-	while( ( c_char = _getc() ) != EOF ){
-		if( c_char == '\n' ) ++line_number;
+	load_next_buffer( 0 );
+
+	if( !counter || !end_ptr ){
+		ERROR ( stderr, "Failed to allocated counter" );
+		return NULL;
+	}
+
+	while( counter < end_ptr ){
+		c_char = *counter;
+	
+		if( counter + 1 == end_ptr ){
+			load_next_buffer( 0 );
+			counter--; // safe limit
+		}
+
+		counter++;
+
+		// if skip fill and continue
+		if( skip ){
+			skip = false;
+			fill_inputs( &env, c_char );
+			continue;
+		}
+		// skip single escape
+		else if ( c_char == '\\' ){
+			skip = true;
+		}
+		// line counter
+		else if( c_char == '\n' ) {
+			++line_number;
+		}
 
 		if( is_json_syntax( c_char ) && c_char != APPO && !string_flag ){
 			switch ( c_char ){
@@ -397,10 +455,6 @@ JSON_NODE* parse_JSON( READER* JSON_READER ){
 			}
 			fill_inputs( &env, c_char );
 
-			if( c_char == '\\' ){
-				int temp = _getc();
-				fill_inputs( &env, temp );
-			}
 			if( PARSER_ERR_RAISED != NO_PARSER_ERROR )
 				goto END;
 			

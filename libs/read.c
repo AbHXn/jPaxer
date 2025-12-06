@@ -7,9 +7,9 @@ const char* _READ_ERR_TYPE = "Read Error: ";
 
 unsigned char 	file_reader_buffer[MAX_READ_SIZE + SAFE_SIZE];
 unsigned char* 	counter 	= NULL;
+unsigned char*  end_ptr		= NULL;
 
 size_t 	byte_read 	= 0;
-bool 	HIT_END 	= false;
 
 const char* get_read_error_msg( READ_ERRORS err_raised ){
 	if ( err_raised >= NO_READ_ERRORS && err_raised < READ_ERR_ENDS ) {
@@ -103,20 +103,6 @@ bool push_string( const char* str ){
 	return true;
 }
 
-bool reverse_pointer( size_t reverse_size ) {
-	if( !counter ){
-		READ_ERR_RAISED = READ_COUNTER_FAILED;
-		return false;
-	}
-	ptrdiff_t avai_size = counter - file_reader_buffer;
-	if( avai_size < ( ptrdiff_t) reverse_size ){
-		READ_ERR_RAISED = READ_READER_OVERFLOW;
-		return false;
-	}
-	counter -= reverse_size;
-	return true;
-}
-
 void load_next_buffer( size_t size ) {
 	if( !JSON_READER_OBJECT ){
 		READ_ERR_RAISED = READ_READER_NULL_ERR;
@@ -125,45 +111,22 @@ void load_next_buffer( size_t size ) {
 	if( JSON_READER_OBJECT->reader_type == FILE_MODE ){
 		
 		FILE* JSON_FILE = JSON_READER_OBJECT->reader.JSON_FILE;
-		counter = file_reader_buffer + SAFE_SIZE;
 		size_t read_size = ( size != 0 ) ? size: MAX_READ_SIZE;
 		byte_read = fread( file_reader_buffer + SAFE_SIZE, 1, read_size, JSON_FILE );
 
-		if( byte_read == 0 && ferror(JSON_FILE) ){
+		if( byte_read == 0 && ferror(JSON_FILE) )
 			READ_ERR_RAISED = READ_FILE_READ_ERROR;
-		}
-		HIT_END = feof( JSON_FILE );
 	}
 	else {
 		unsigned char* json_str = JSON_READER_OBJECT->reader.JSON_STR;
 		size_t sbyte_read = strlcpy( file_reader_buffer + SAFE_SIZE, json_str, MAX_READ_SIZE );
-		if( sbyte_read < MAX_READ_SIZE - 1 ){
-			HIT_END = true;
-		}
+	
 		byte_read = ( sbyte_read >= MAX_READ_SIZE ? MAX_READ_SIZE - 1 : sbyte_read );
-		counter = file_reader_buffer + SAFE_SIZE;
 
 		JSON_READER_OBJECT->reader.JSON_STR += byte_read;
 	}
-}
-
-int _getc( void ){
-	if( byte_read == 0 )
-		load_next_buffer( 0 );
-
-	if( byte_read == 0 ) return EOF;
-
-	unsigned char* max_addr = file_reader_buffer + byte_read + SAFE_SIZE;
-	if( counter < max_addr )
-		return (unsigned char) *counter++;
-	else{
-		if( !HIT_END ){
-			load_next_buffer( 0 );
-			if( byte_read > 0 && READ_ERR_RAISED == NO_READ_ERRORS )
-				return (unsigned char) *counter++;
-		}
-	}
-	return EOF;
+	counter = file_reader_buffer + SAFE_SIZE;
+	end_ptr = file_reader_buffer + SAFE_SIZE + byte_read;
 }
 
 void flush_buffer( void ){

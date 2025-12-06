@@ -198,6 +198,7 @@ void __delete__( JSON_NODE** j_node, const char* key ){
     while( pairs ){
         if( pairs->j_node && strcmp( pairs->j_node->key, key ) == 0 ){
             if( prev ){
+                pairs->next->prev = pairs->prev;
                 prev->next = pairs->next;
                 pairs->next = NULL;
                 return;
@@ -226,19 +227,7 @@ void __create__( JSON_NODE** j_node, const char* key, void* value, JSON_DTYPE dt
     }
     fill_value_acc( &n_node, value, dtype );
     n_node->dtype      = dtype;
-    jobject* n_jobject = get_jobject( n_node );
-
-    if( !n_jobject ){
-        ERROR(stderr, "Failed to create jobject\n");
-        return ;
-    }
-    if( !pairs ){
-        c_jnode->value.object_val = n_jobject;
-        return ;
-    }
-    while( pairs->next )
-        pairs = pairs->next;
-    pairs->next = n_jobject;
+    add_J_NODE_to_jobject( j_node, n_node );
 }
 
 void __back__( JSON_NODE** j_node, int steps ){

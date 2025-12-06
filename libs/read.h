@@ -13,8 +13,8 @@ typedef enum _errors READ_ERRORS;
 
 extern unsigned char 	file_reader_buffer[MAX_READ_SIZE + SAFE_SIZE];
 extern unsigned char* 	counter;
+extern unsigned char* 	end_ptr;
 extern size_t 			byte_read;
-extern bool 			HIT_END;
 
 extern const char* _READ_ERR_TYPE;
 
@@ -61,10 +61,8 @@ const char* get_read_error_msg( READ_ERRORS err_raised );
 READ_ERRORS get_read_error( void );
 
 bool 		push_string 	 	  ( const char* ) ;
-bool 		reverse_pointer  	  ( size_t reverse_size ) ;
 bool 		push_char_buffer	  ( const char s ) ;
 void  		load_next_buffer 	  ( size_t x ) ;
-int  		_getc				  ( void ) ;
 void 		strip 				  ( char * ) ;
 char*       get_string_some_range (size_t, int*);
 void 		flush_buffer		  ( void );

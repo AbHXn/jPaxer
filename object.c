@@ -255,5 +255,6 @@ jobject* get_jobject( JSON_NODE* node ){
 	}
 	new_node->j_node = node;
 	new_node->next = NULL;
+	new_node->prev = NULL;
 	return new_node;
 }

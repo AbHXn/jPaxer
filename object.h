@@ -26,6 +26,7 @@ typedef enum _dtype{
 typedef struct _jobject{
 	struct _jnode*	  j_node;
 	struct _jobject*  next;
+	struct _jobject*  prev;
 }jobject;
 
 typedef struct _jnode{
