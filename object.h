@@ -82,9 +82,13 @@ static const char* object_err_msgs[] = {
 void* 		get_dtype( const char* , JSON_DTYPE* );
 JSON_NODE*  get_jnode( const char * );
 JSON_DTYPE	non_returned_dtype( const char * );
-jobject* 	get_jobject( JSON_NODE*  );
 void 		fill_value_acc( JSON_NODE** , void* , JSON_DTYPE  );
-void* 		get_string( const char* );
 bool 		is_json_syntax( char c );
+
+void* 		get_J_INT		( long int data );
+void* 		get_J_DOUBLE	( double data );
+void* 		get_J_BOOL	( bool data );
+void* 		get_J_STRING	( char* data );
+jobject* 	get_jobject( JSON_NODE*  );
 
 #endif

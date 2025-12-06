@@ -1,24 +1,89 @@
   {
-      "id": 101,
-      "setting": "high_fidelity",
-      "status": "active",
-      "params": 
+      "user": 
+      {
+          "id": 12345,
+          "name": "Alice \"The Dev\" Smith",
+          "email": "alice@example.com",
+          "active": true,
+          "roles": 
+          [
+              "admin",
+              "editor",
+              "tester"
+          ],
+          "profile": 
+          {
+              "age": 29,
+              "height": 165.500000,
+              "preferences": 
+              {
+                  "theme": "dark",
+                  "notifications": 
+                  {
+                      "email": true,
+                      "sms": false
+                  }
+              }
+          }
+      },
+      "projects": 
       [
           
+          {
+              "id": "proj_001",
+              "name": "Malware Analyzer",
+              "tags": 
+              [
+                  "c",
+                  "security",
+                  "parser"
+              ],
+              "stats": 
+              {
+                  "stars": 418,
+                  "forks": 73,
+                  "active": true
+              }
+          },
+          
+          {
+              "id": "proj_002",
+              "name": "AI Engine",
+              "tags": 
+              [
+                  "ml",
+                  "dl",
+                  "transformer"
+              ],
+              "stats": 
+              {
+                  "stars": 1024,
+                  "forks": 256,
+                  "active": false
+              }
+          }
+      ],
+      "misc": 
+      {
+          "null_field": null,
+          "escaped": "line1\nline2\t✓ Unicode",
+          "values": 
+          [
+              1,
+              2,
+              3,
+              4.750000,
+              -10,
+              601999999999999995805696.000000
+          ]
+      },
+      "params": 
+      {
+          "teamMembers": 
           [
               "Alice",
               "Bob",
               "Charlie"
           ]
-      ],
-      "new_details": 
-      {
-          "details": 
-          {
-              "lead": "Alice",
-              "startDate": "2025-01-15"
-          }
-      },
-      "whoisthis": "admin",
-      "user_id": 123
+      }
   }

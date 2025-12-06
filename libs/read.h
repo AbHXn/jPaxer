@@ -15,30 +15,45 @@ extern unsigned char 	file_reader_buffer[MAX_READ_SIZE + SAFE_SIZE];
 extern unsigned char* 	counter;
 extern size_t 			byte_read;
 extern bool 			HIT_END;
-extern FILE* 			JSON_FILE;
 
 extern const char* _READ_ERR_TYPE;
 
 static const char* read_error_msgs[] = {
 	"No error occured\n",
-	"File is null\n",
+	"JSON reader is null\n",
 	"Buffer size is more than provided str size, buffer overflow\n",
 	"String is NULL, failed to push\n",
-	"File Read Error occured\n",
+	"Read Error occured\n",
 	"Counter is not initialized\n",
 	"Buffer is not empty which may overwrite\n",
+	"Failed to create Reader object allocation error\n",
+	"JSON_FILE/JSON_str is empty\n",
 };
 
 typedef enum _errors{
 	NO_READ_ERRORS			,
-	READ_NULL_FILE_ERROR	,
+	READ_READER_NULL_ERR	,
 	READ_READER_OVERFLOW	,
 	READ_READER_UNDERFLOW	,
 	READ_PUSH_STRING_NULL	,
 	READ_FILE_READ_ERROR	,
 	READ_COUNTER_FAILED 	,
+	READ_ALLOCATION_ERROR 	,
+	READ_SOURCE_FILE_EMTPY	,
 	READ_ERR_ENDS
 }READ_ERRORS;
+
+typedef enum {
+	FILE_MODE, STR_MODE
+}READER_TYPE;
+
+typedef struct _reader{
+	READER_TYPE reader_type;
+	union{
+		FILE* 		   JSON_FILE;
+		unsigned char* JSON_STR;
+	} reader;
+}READER;
 
 extern READ_ERRORS READ_ERR_RAISED;
 
@@ -53,4 +68,9 @@ int  		_getc				  ( void ) ;
 void 		strip 				  ( char * ) ;
 char*       get_string_some_range (size_t, int*);
 void 		flush_buffer		  ( void );
+
+
+READER* create_reader_for_str( const char* json_str );
+READER* create_reader_for_FILE( FILE* json_file );
+
 #endif

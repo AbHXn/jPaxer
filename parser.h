@@ -25,7 +25,7 @@
 // buffer is int to track of EOF
 extern int 		BUFFER[BUFFER_SIZE];
 extern int 		buffer_ptr;
-extern FILE* 	JSON_FILE;
+extern READER* 	JSON_READER_OBJECT;
 
 
 typedef enum {
@@ -76,6 +76,10 @@ JSON_NODE* 	 get_full_JSON_NODE_pair_from_env ( WORKING_ENV* env, bool )				 ;
 bool 		 FLUSH_THE_STACK ( WORKING_ENV** env, STACK** dfs_stack )			 ;
 JSON_NODE* 	 parse_JSON_from_FILE ( FILE*  )									 ;
 void 		 add_parent_info_from_stack( JSON_NODE** new_node, STACK* dfs_stack );
+
+
+JSON_NODE* parse_JSON_from_str ( const char* json_str );
+JSON_NODE* parse_JSON_from_FILE( FILE* json_file );
 
 static void PRINT_SYNTAX_ERROR( size_t line_number, int c_char ){
 	int ptr = 0;

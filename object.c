@@ -64,24 +64,21 @@ static bool parse_long_safe( const char* str, long* out ){
     return true;
 }
 
-static inline JSON_DTYPE test_integer(const char* str, long int** save_ptr) {
+static inline JSON_DTYPE test_integer( const char* str, long int** save_ptr) {
     if ( !str || *str == '\0' ) return J_SKIP;
 
     long val;
     if( !parse_long_safe ( str, &val ) ) return J_SKIP;
 
-	long *temp = _malloc( sizeof( long ) );
-	if( !temp ){
-		OBJECT_ERR_RAISED = OBJECT_ALLOCATION_ERROR;
-		return J_SKIP;
-	}
+	long *temp = get_J_INT( val );
+	if( !temp ) J_SKIP;
 
 	*temp = val;
 	*save_ptr = temp;
 	return J_INT;
 }
 
-static inline JSON_DTYPE test_double(const char* str, double** save_ptr) {
+static inline JSON_DTYPE test_double( const char* str, double** save_ptr) {
     if ( !str || *str == '\0' ) return J_SKIP;
 
     char* endptr;
@@ -90,26 +87,23 @@ static inline JSON_DTYPE test_double(const char* str, double** save_ptr) {
     if ( *endptr != '\0' || isnan( val ) || isinf( val ) )
     	return J_SKIP; 
 
-   	double* temp = _malloc( sizeof( double ) );
-   	if( !temp ) {
-   		OBJECT_ERR_RAISED = OBJECT_ALLOCATION_ERROR;
-   		return J_SKIP;
-   	}
+   	double *temp = get_J_DOUBLE( val );
+	if( !temp ) J_SKIP;
+
    	*temp = val;
    	*save_ptr = temp;
     return J_DOUBLE;
 }
 
-static inline JSON_DTYPE test_bool(const char* str, bool** save_ptr) {
+static inline JSON_DTYPE test_bool( const char* str, bool** save_ptr) {
     if ( !str ) return J_SKIP;
 
     if ( strcmp(str, "true") == 0 || strcmp(str, "false") == 0 ) {
         bool val = strcmp( str, "true" ) == 0;
-       	bool* temp = _malloc( sizeof( bool ) );
-    	if( !temp ) {
-    		OBJECT_ERR_RAISED = OBJECT_ALLOCATION_ERROR;
-    		return J_SKIP;
-    	}
+       
+        bool *temp = get_J_BOOL( val );
+		if( !temp ) J_SKIP;
+
     	*temp = val;
     	*save_ptr = temp;
     	return J_BOOL;
@@ -117,23 +111,11 @@ static inline JSON_DTYPE test_bool(const char* str, bool** save_ptr) {
     return J_SKIP;
 }
 
-JSON_DTYPE test_null(const char* str) {
+JSON_DTYPE test_null( const char* str ) {
     if (str && strcmp(str, "null") == 0) {
         return J_NULL;
     }
     return J_SKIP;
-}
-
-void*  get_string( const char* str ){
-	if( !str ) return NULL;
-
-	char* string_value = _malloc( strlen( str ) + 1 );
-	if( string_value == NULL ){
-		OBJECT_ERR_RAISED = OBJECT_ALLOCATION_ERROR;
-		return NULL;
-	}
-	strcpy( string_value, str );
-	return string_value;
 }
 
 void* get_dtype( const char* value, JSON_DTYPE* type ){
@@ -161,18 +143,6 @@ JSON_DTYPE non_returned_dtype ( const char *str ){
 	if( (json_type = test_null( str )) != J_SKIP )
 		return json_type;
 	return J_STRING;
-}
-
-jobject* get_jobject( JSON_NODE* node ){
-	jobject* new_node = _malloc( sizeof( jobject ) );
-
-	if( !new_node ){
-		OBJECT_ERR_RAISED = OBJECT_ALLOCATION_ERROR;
-		return NULL;
-	}
-	new_node->j_node = node;
-	new_node->next = NULL;
-	return new_node;
 }
 
 void fill_value_acc( JSON_NODE** new_node, void* value_data, JSON_DTYPE type ){
@@ -234,4 +204,56 @@ JSON_NODE* get_jnode( const char *key ){
 	if( OBJECT_ERR_RAISED == NO_OBJECT_ERRORS )
 		return nnode;
 	return NULL;
+}
+
+void* get_J_INT( long int data ){
+    long int* ptr = _malloc( sizeof( data ) );
+    if( !ptr ){
+        OBJECT_ERR_RAISED = OBJECT_ALLOCATION_ERROR;
+   		return NULL;
+    }
+    *ptr = data;
+    return (void*) ptr;
+}
+
+void* get_J_DOUBLE( double data ){
+    double* ptr = _malloc( sizeof( double ) );
+    if( !ptr ){
+        OBJECT_ERR_RAISED = OBJECT_ALLOCATION_ERROR;
+   		return NULL;
+    }
+    *ptr = data;
+    return (void*) ptr;
+}
+
+void* get_J_BOOL( bool data ){
+    bool* ptr = _malloc( sizeof( bool ) );
+    if( !ptr ){
+        OBJECT_ERR_RAISED = OBJECT_ALLOCATION_ERROR;
+   		return NULL;
+    }
+    *ptr = data;
+    return (void*) ptr;
+}
+
+void* get_J_STRING( char* data ){
+    char* ptr = _malloc( strlen( data ) + 1 );
+    if( !ptr ){
+        OBJECT_ERR_RAISED = OBJECT_ALLOCATION_ERROR;
+   		return NULL;
+    }
+    strcpy( ptr, data );
+    return (void*) ptr;
+}
+
+jobject* get_jobject( JSON_NODE* node ){
+	jobject* new_node = _malloc( sizeof( jobject ) );
+
+	if( !new_node ){
+		OBJECT_ERR_RAISED = OBJECT_ALLOCATION_ERROR;
+		return NULL;
+	}
+	new_node->j_node = node;
+	new_node->next = NULL;
+	return new_node;
 }

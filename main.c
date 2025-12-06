@@ -2,15 +2,59 @@
 #include "jpaxer.h"
 
 int main( int argc, char *argv[] ){
-	FILE* jfile1 = fopen( "jfiles/test1.json", "r" );
+	// A simple script for modifying json 
+	const char *json_str =
+		"{"
+		  "\"user\": {"
+		    "\"id\": 12345,"
+		    "\"name\": \"Alice \\\"The Dev\\\" Smith\","
+		    "\"email\": \"alice@example.com\","
+		    "\"active\": true,"
+		    "\"roles\": [\"admin\", \"editor\", \"tester\"],"
+		    "\"profile\": {"
+		      "\"age\": 29,"
+		      "\"height\": 165.5,"
+		      "\"preferences\": {"
+		        "\"theme\": \"dark\","
+		        "\"notifications\": {"
+		          "\"email\": true,"
+		          "\"sms\": false"
+		        "}"
+		      "}"
+		    "}"
+		  "},"
+		  "\"projects\": ["
+		    "{"
+		      "\"id\": \"proj_001\","
+		      "\"name\": \"Malware Analyzer\","
+		      "\"tags\": [\"c\", \"security\", \"parser\"],"
+		      "\"stats\": {"
+		        "\"stars\": 418,"
+		        "\"forks\": 73,"
+		        "\"active\": true"
+		      "}"
+		    "},"
+		    "{"
+		      "\"id\": \"proj_002\","
+		      "\"name\": \"AI Engine\","
+		      "\"tags\": [\"ml\", \"dl\", \"transformer\"],"
+		      "\"stats\": {"
+		        "\"stars\": 1024,"
+		        "\"forks\": 256,"
+		        "\"active\": false"
+		      "}"
+		    "}"
+		  "],"
+		  "\"misc\": {"
+		    "\"null_field\": null,"
+		    "\"escaped\": \"line1\\nline2\\t✓ Unicode\","
+		    "\"values\": [1, 2, 3, 4.75, -10, 6.02e23]"
+		  "}"
+		"}";
 
-	if( !jfile1 ){
-		fprintf(stderr, "Failed to open json file");
-		return -1;
-	}
+	
 
-	JSON_NODE* first_json = parse_JSON_from_FILE( jfile1 );
-	fclose( jfile1 );
+	JSON_NODE* first_json = parse_JSON_from_str( json_str );
 
 	FILE* jfile2 = fopen( "jfiles/test2.json", "r" );
 
@@ -22,21 +66,16 @@ int main( int argc, char *argv[] ){
 	JSON_NODE* second_json = parse_JSON_from_FILE( jfile2 );
 	fclose( jfile2 );
 
-	get( first_json, 2, "configurations", "0" );
+	// second_json -> json node
+	// 2 -> more 2 keys
+	// 0 -> key 1 
+	// "tempMembers" -> key 2  
 	get( second_json, 2, "0", "teamMembers" );
 
 	print_JSON_node( first_json );
 	print_JSON_node( second_json );
 
-	set( first_json, "params", ( void* )second_json, J_OBJECT );
-
-	back( second_json, 1 );
-
-	get( second_json, 1, "details" );
-	add( first_json, "new_details", ( void* )second_json, J_OBJECT );
-	add( first_json, "whoisthis", get_J_STRING("admin"), J_STRING );
-
-	add( first_json, "user_id", get_J_INT(123), J_INT );
+	add( first_json, "params", ( void* )second_json, J_OBJECT );
 
 	print_JSON_node( first_json );
 

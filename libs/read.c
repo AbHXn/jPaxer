@@ -2,7 +2,7 @@
 #include "error.h"
 
 READ_ERRORS READ_ERR_RAISED  = NO_READ_ERRORS;
-FILE* JSON_FILE = NULL;
+READER* 	JSON_READER_OBJECT = NULL;
 const char* _READ_ERR_TYPE = "Read Error: ";
 
 unsigned char 	file_reader_buffer[MAX_READ_SIZE + SAFE_SIZE];
@@ -118,18 +118,33 @@ bool reverse_pointer( size_t reverse_size ) {
 }
 
 void load_next_buffer( size_t size ) {
-	if( !JSON_FILE ){
-		READ_ERR_RAISED = READ_NULL_FILE_ERROR;
+	if( !JSON_READER_OBJECT ){
+		READ_ERR_RAISED = READ_READER_NULL_ERR;
 		return;
 	}
-	counter = file_reader_buffer + SAFE_SIZE;
-	size_t read_size = ( size != 0 ) ? size: MAX_READ_SIZE;
-	byte_read = fread( file_reader_buffer + SAFE_SIZE, 1, read_size, JSON_FILE );
+	if( JSON_READER_OBJECT->reader_type == FILE_MODE ){
+		
+		FILE* JSON_FILE = JSON_READER_OBJECT->reader.JSON_FILE;
+		counter = file_reader_buffer + SAFE_SIZE;
+		size_t read_size = ( size != 0 ) ? size: MAX_READ_SIZE;
+		byte_read = fread( file_reader_buffer + SAFE_SIZE, 1, read_size, JSON_FILE );
 
-	if( byte_read == 0 && ferror(JSON_FILE) ){
-		READ_ERR_RAISED = READ_FILE_READ_ERROR;
+		if( byte_read == 0 && ferror(JSON_FILE) ){
+			READ_ERR_RAISED = READ_FILE_READ_ERROR;
+		}
+		HIT_END = feof( JSON_FILE );
 	}
-	HIT_END = feof( JSON_FILE );
+	else {
+		unsigned char* json_str = JSON_READER_OBJECT->reader.JSON_STR;
+		size_t sbyte_read = strlcpy( file_reader_buffer + SAFE_SIZE, json_str, MAX_READ_SIZE );
+		if( sbyte_read < MAX_READ_SIZE - 1 ){
+			HIT_END = true;
+		}
+		byte_read = ( sbyte_read >= MAX_READ_SIZE ? MAX_READ_SIZE - 1 : sbyte_read );
+		counter = file_reader_buffer + SAFE_SIZE;
+
+		JSON_READER_OBJECT->reader.JSON_STR += byte_read;
+	}
 }
 
 int _getc( void ){
@@ -152,14 +167,42 @@ int _getc( void ){
 }
 
 void flush_buffer( void ){
-	counter 		 = NULL;
-	byte_read 		 = 0;
-	READ_ERR_RAISED  = NO_READ_ERRORS;
-	JSON_FILE 		 = NULL;
+	counter 		   = NULL;
+	byte_read 		   = 0;
+	READ_ERR_RAISED    = NO_READ_ERRORS;
+	JSON_READER_OBJECT = NULL;
 	memset( file_reader_buffer, 0, MAX_READ_SIZE + SAFE_SIZE );
 }
 
-void _ungetc(void) {
-    if(counter > file_reader_buffer)
-        counter--;
+READER* create_reader_for_str( const char* json_str ){
+	if( !json_str ){
+		fprintf(stderr, "JSON file is null\n" );
+		return NULL;
+	}
+	READER* reader_obj = _malloc( sizeof( READER ) );
+	if( !reader_obj )
+		return NULL;
+
+	reader_obj->reader_type 	= STR_MODE;
+
+	char* json_cpy = _malloc( strlen( json_str ) + 1 );
+	if( !json_cpy ) return NULL;
+	strcpy( json_cpy, json_str );
+
+	reader_obj->reader.JSON_STR = json_cpy;
+	return reader_obj;
+}
+
+READER* create_reader_for_FILE( FILE* json_file ){
+	if( !json_file ){
+		fprintf(stderr, "JSON file is null\n" );
+		return NULL;
+	}
+	READER* reader_obj = _malloc( sizeof( READER ) );
+	if( !reader_obj )
+		return NULL;
+
+	reader_obj->reader_type 	= FILE_MODE;
+	reader_obj->reader.JSON_FILE = json_file;
+	return reader_obj;
 }

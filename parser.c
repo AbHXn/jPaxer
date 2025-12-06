@@ -156,7 +156,7 @@ JSON_NODE* get_full_JSON_NODE_pair_from_env( WORKING_ENV* env, bool is_string ){
 		cur_value_type = non_returned_dtype( env->value );
 		if( cur_value_type == J_STRING ){
 			if ( is_string )
-				value_ptr = get_string( env->value );
+				value_ptr = get_J_STRING( env->value );
 			else {
 				PARSER_ERR_RAISED = PARSER_SYNTAX_ERROR;
 				return NULL;
@@ -299,14 +299,15 @@ void fill_inputs( WORKING_ENV** env, int c_char ){
 		: safe_push( (*env)->value, &((*env)->v_index), c_char, MAX_VALUE_SIZE );
 }
 
-JSON_NODE* parse_JSON_from_FILE( FILE* JSON_file ){
-	if( !JSON_file ){
-		ERROR(stderr, "JSON file not provide\n");
+JSON_NODE* parse_JSON( READER* JSON_READER ){
+	if( !JSON_READER ){
+		ERROR(stderr, "Failed to Parse\n");
 		return NULL;
 	}
 
 	int c_char;
-	JSON_FILE 					= JSON_file;
+
+	JSON_READER_OBJECT 			= JSON_READER;
 	STACK* dfs_stack 			= NULL;
 	FLUSH_TYPE flushed_before 	= NO_FLUSH_HAPPENDED;
 	WORKING_ENV* env 			= init_working_env();
@@ -316,11 +317,13 @@ JSON_NODE* parse_JSON_from_FILE( FILE* JSON_file ){
 		PARSER_ERR_RAISED = PARSER_ALLOCATION_ERROR;
 		return NULL;
 	}
+
 	strcpy( env->key, "DICT" );
 	env->FLAG = KEY_ENTERING;
 
 	while( ( c_char = _getc() ) != EOF ){
 		if( c_char == '\n' ) ++line_number;
+
 		if( is_json_syntax( c_char ) && c_char != APPO && !string_flag ){
 			switch ( c_char ){
 				case CLOSE_C: 
@@ -414,4 +417,34 @@ JSON_NODE* parse_JSON_from_FILE( FILE* JSON_file ){
 	}
 	flush_buffer();
 	return (JSON_NODE*) (((STACK_DATA* ) top( &dfs_stack ))->j_data);
+}
+
+JSON_NODE* parse_JSON_from_str( const char* json_str ){
+	if( !json_str ){
+		ERROR( stderr, "JSON string is NULL\n" );
+		return NULL;
+	}
+
+	READER* new_reader_object = create_reader_for_str( json_str );
+	if( !new_reader_object ){
+		ERROR( stderr, get_read_error_msg( get_read_error() ) );
+		return NULL;
+	}
+
+	return parse_JSON( new_reader_object ); 
+
+}
+
+JSON_NODE* parse_JSON_from_FILE( FILE* json_file ){
+	if( !json_file ){
+		ERROR( stderr, "JSON FILE is NULL\n" );
+		return NULL;
+	}
+
+	READER* new_reader_object = create_reader_for_FILE( json_file );
+	if( !new_reader_object ){
+		ERROR( stderr, get_read_error_msg( get_read_error() ) );
+		return NULL;
+	}
+	return parse_JSON( new_reader_object ); 
 }
