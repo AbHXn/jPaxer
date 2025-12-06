@@ -40,8 +40,11 @@ int main( int argc, char *argv[] ){
 
 	print_JSON_node( first_json );
 
-	FILE* jile = fopen( "TEST.json", "w" );
-	JSON_FLUSH( first_json, jile, 2 );
+	FILE* new_jfile = fopen( "TEST.json", "w" );
+	JSON_FLUSH( first_json, new_jfile, 2 );
+	fclose( new_jfile );
+
+	free_memory();
 
 	return 0;
 }

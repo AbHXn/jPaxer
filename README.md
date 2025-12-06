@@ -64,11 +64,11 @@ JPAXER provides structured error handling:
 ## Usage Example
 
 ```c
+#include <stdio.h>
 #include "jpaxer.h"
 
-int main() {
-	// open json file
-    FILE* jfile1 = fopen( "jfiles/test1.json", "r" );
+int main( int argc, char *argv[] ){
+	FILE* jfile1 = fopen( "jfiles/test1.json", "r" );
 
 	if( !jfile1 ){
 		fprintf(stderr, "Failed to open json file");
@@ -106,12 +106,15 @@ int main() {
 
 	print_JSON_node( first_json );
 
-	FILE* jile = fopen( "TEST.json", "w" );
-	JSON_FLUSH( first_json, jile, 2 );
-    free_memory();
+	FILE* new_jfile = fopen( "TEST.json", "w" );
+	JSON_FLUSH( first_json, new_jfile, 2 );
+	fclose( new_jfile );
 
-    return 0;
+	free_memory();
+
+	return 0;
 }
+
 ```
 
 ---
