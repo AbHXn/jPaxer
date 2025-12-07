@@ -79,7 +79,7 @@ int main( int argc, char *argv[] ){
 
 	print_JSON_node( first_json );
 
-	FILE* new_jfile = fopen( "TEST.json", "w" );
+	FILE* new_jfile = fopen( "result.json", "w" );
 	JSON_FLUSH( first_json, new_jfile, 2 );
 	fclose( new_jfile );
 

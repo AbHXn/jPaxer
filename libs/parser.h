@@ -51,6 +51,7 @@ typedef struct _env{
 	char 	   value[ MAX_VALUE_SIZE ];
 	size_t	   k_index;
 	size_t	   v_index;
+	bool 	   is_string_value;
 }WORKING_ENV;
 
 typedef struct stack_data{
@@ -70,12 +71,11 @@ typedef enum _parser_error{
 
 extern PARSER_ERROR PARSER_ERR_RAISED;
 
-STACK_DATA*  get_stack_data ( JSON_NODE* j_data )								 ;
+STACK_DATA*  get_stack_data_node ( JSON_NODE* j_data )							 ;
 bool 		 add_J_NODE_to_jobject ( JSON_NODE** j_node, JSON_NODE* push_node )	 ;
-JSON_NODE* 	 get_full_JSON_NODE_pair_from_env ( WORKING_ENV* env, bool )				 ;
+JSON_NODE* 	 get_full_JSON_NODE_pair_from_env ( WORKING_ENV* env, bool )		 ;
 bool 		 FLUSH_THE_STACK ( WORKING_ENV** env, STACK** dfs_stack )			 ;
 JSON_NODE* 	 parse_JSON_from_FILE ( FILE*  )									 ;
-void 		 add_parent_info_from_stack( JSON_NODE** new_node, STACK* dfs_stack );
 
 
 JSON_NODE* parse_JSON_from_str ( const char* json_str );
