@@ -10,8 +10,8 @@
 #include <limits.h>
 #include <math.h>
 
-#include "libs/alloc.h"
-#include "libs/error.h"
+#include "../utils/alloc.h"
+#include "../utils/error.h"
 
 typedef enum _dtype{
 	J_SKIP	 ,

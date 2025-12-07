@@ -13,9 +13,9 @@
 #include <ctype.h>
 #include <string.h>
 
-#include "libs/alloc.h"
-#include "libs/read.h"
-#include "libs/stack.h"
+#include "../utils/alloc.h"
+#include "../utils/read.h"
+#include "../utils/stack.h"
 #include "object.h"
 
 
