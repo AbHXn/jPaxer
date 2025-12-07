@@ -72,15 +72,15 @@ int main( int argc, char *argv[] ){
 	// "tempMembers" -> key 2  
 	get( second_json, 2, "0", "teamMembers" );
 
-	print_JSON_node( first_json );
-	print_JSON_node( second_json );
+	print_JSON_NODE( first_json );
+	print_JSON_NODE( second_json );
 
 	add( first_json, "params", ( void* )second_json, J_OBJECT );
 
-	print_JSON_node( first_json );
+	print_JSON_NODE( first_json );
 
 	FILE* new_jfile = fopen( "result.json", "w" );
-	JSON_FLUSH( first_json, new_jfile, 2 );
+	save_JSON_to_FILE( first_json, new_jfile, 2 );
 	fclose( new_jfile );
 
 	free_memory();

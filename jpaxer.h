@@ -15,9 +15,9 @@
 
 typedef struct _json_traverser JSON_TR;
 typedef void (*jFUNC)(JSON_TR**,const char*);
-
-void   JSON_FLUSH(JSON_NODE* , FILE*, int);
-void   print_JSON_node( JSON_NODE* root );
+ 
+void   save_JSON_to_FILE( JSON_NODE* , FILE*, int );
+void   print_JSON_NODE( JSON_NODE* root );
 
 void   __read__	 ( JSON_NODE**, int, ...);
 void   __update__( JSON_NODE**, const char*, void*, JSON_DTYPE );

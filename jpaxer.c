@@ -95,7 +95,7 @@ void write_escaped_string(FILE *json_file, const char *str) {
     }
 }
 
-void print_JSON_node(JSON_NODE* root) {
+void print_JSON_NODE( JSON_NODE* root ) {
     if (!root) return;
 
     printf(C_BRACE "{\n" C_RESET);
@@ -120,7 +120,7 @@ void print_JSON_node(JSON_NODE* root) {
     printf(C_BRACE "}\n" C_RESET);
 }
 
-void JSON_FLUSH(JSON_NODE* json_data, FILE* json_file, int indent) {
+void save_JSON_to_FILE(JSON_NODE* json_data, FILE* json_file, int indent) {
     if (!json_data) return;
 
     int is_list       = json_data->multiple_values;
@@ -174,7 +174,7 @@ void JSON_FLUSH(JSON_NODE* json_data, FILE* json_file, int indent) {
 
             case J_OBJECT:
                 fputc('\n', json_file);
-                JSON_FLUSH(jnode, json_file, indent + 4);
+                save_JSON_to_FILE(jnode, json_file, indent + 4);
                 break;
         }
         contents = contents->next;
@@ -339,7 +339,10 @@ void __create__( JSON_NODE** j_node, const char* key, void* value, JSON_DTYPE dt
 
 void __back__( JSON_NODE** j_node, int steps ){
     if( !j_node || *j_node == NULL ) return;
+
     while( steps-- > 0 && (*j_node)->parent != NULL )
+    {
         *j_node = (*j_node)->parent;
+    }
 }
 
