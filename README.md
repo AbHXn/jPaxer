@@ -8,11 +8,7 @@
 
 ## 🌟 Overview
 
-JPAXER is a **lightweight, memory-efficient JSON parser and manipulator** written entirely in C from scratch.  
-It provides a fully dynamic JSON object tree that allows **creation, reading, updating, and deletion of JSON nodes**.  
-
-JPAXER is designed to demonstrate **manual memory management using arena allocation**, **error tracking with line numbers and pointer indicators**, and **low-level parsing techniques**.  
-It handles nested JSON objects, arrays, and complex structures while providing **color-coded JSON printing** for easy debugging.
+JPAXER is a lightweight JSON parser and manipulator written entirely in C from scratch, providing dynamic JSON node creation, reading, updating, and deletion with color-coded output and detailed error tracking for easier debugging.
 
 ---
 
