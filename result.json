@@ -2,7 +2,7 @@
       "user": 
       {
           "id": 12345,
-          "name": "Alice \"The Dev\" Smith",
+          "name": "Alice \\\"The Dev\\\" Smith",
           "email": "alice@example.com",
           "active": true,
           "roles": 
@@ -66,7 +66,7 @@
       "misc": 
       {
           "null_field": null,
-          "escaped": "line1\nline2\t✓ Unicode",
+          "escaped": "line1\\nline2\\t✓ Unicode",
           "values": 
           [
               1,

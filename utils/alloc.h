@@ -22,7 +22,8 @@ typedef enum _alloc_errors{
 	NO_ALLOCATION_ERRORS   ,
 	ALLOCATION_MEMORY_FAILED,
 	ALLOCATION_BLOCK_FAILED ,
-	ALLOCATION_ERR_ENDS
+	ALLOCATION_LIMIT_EXEEDED,
+	ALLOCATION_ERR_ENDS		,
 }ALLOCATION_ERRORS;
 
 extern const char* _ALLOC_ERR_TYPE;
@@ -35,6 +36,7 @@ static const char* allocation_error_msgs[] = {
 	"no allocation errors occured\n",
 	"struct memory allocation failed\n",
 	"block allocation failed in memory\n",
+	"requested allocation size exeeded its limit\n"
 };
 
 bool 	alloc_next		( void );

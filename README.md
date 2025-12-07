@@ -35,6 +35,7 @@ It was designed as a fun learning project to explore **C memory management, poin
 * Does not support extremely large JSON files efficiently (no streaming parsing).
 * No full compliance with the JSON standard (e.g., Unicode escapes, scientific notation parsing may be limited).
 
+
 ---
 
 ## Memory Management
@@ -43,7 +44,7 @@ It was designed as a fun learning project to explore **C memory management, poin
 * Avoid passing stack-allocated variables directly to `add` or `set` for non-string values.
 * Use helper functions like `get_J_INT(long value)` or `get_J_DOUBLE(double value)` to safely allocate memory for numeric values.
 * Always free the memory after usage using `free_memory()` to avoid memory leaks.
-
+* This library uses an arena allocator. Updates and deletes do not reclaim individual values; memory is released when the arena is reset.
 ---
 
 ## Error Handling
