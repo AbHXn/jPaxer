@@ -69,11 +69,7 @@ static inline WORKING_ENV* init_working_env( void ){
 		return NULL;
 	}
 
-	new_working_env->k_index	 	 = 0;
-	new_working_env->v_index	 	 = 0;
-	new_working_env->FLAG 	 	 	 = 0;
-	new_working_env->list_index  	 = 0;	
-	new_working_env->is_string_value = false;
+	memset( new_working_env, 0, sizeof( WORKING_ENV ) );
 	
 	return new_working_env;
 }
@@ -422,6 +418,8 @@ JSON_NODE* parse_JSON( READER* JSON_READER ){
 
 	while( counter < end_ptr ){
 		c_char = *counter;
+
+		//putchar(c_char);
 	
 		if( counter + 1 == end_ptr )
 		{
