@@ -94,7 +94,7 @@ JPAXER is a lightweight JSON parser and manipulator written entirely in C from s
 
 | Function | Signature | Description |
 |----------|-----------|-------------|
-| Save JSON | `void save_JSON_to_FILE(JSON_NODE* data, FILE* json_file);` | Write JSON to file with formatting. |
+| Save JSON | `void save_JSON_to_FILE(JSON_NODE* data, FILE* json_file, int indent);` | Write JSON to file with formatting. |
 | Print JSON | `void print_JSON_NODE(JSON_NODE* node);` | Print JSON with color-coded syntax. |
 
 ### Helper Functions for Values
@@ -124,7 +124,7 @@ int main() {
     print_JSON_NODE(json1);
 
     FILE* file_out = fopen("output.json", "w");
-    save_JSON_to_FILE(json1, file_out);
+    save_JSON_to_FILE(json1, file_out, 2);
     fclose(file_out);
 
     free_memory();
