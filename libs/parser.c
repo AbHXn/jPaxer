@@ -173,7 +173,6 @@ JSON_NODE* get_full_JSON_NODE_pair_from_env( WORKING_ENV* env, bool is_string ){
 			if( cur_value_type == J_STRING ){
 				PARSER_ERR_RAISED = PARSER_SYNTAX_ERROR;
 				return NULL;
-			
 			}
 		}
 	}
@@ -240,7 +239,7 @@ void handle_open_square_or_curly( WORKING_ENV** env, int c_char, STACK** dfs_sta
 	new_node->dtype 		   = J_OBJECT;
 	new_node->multiple_values  = ( c_char == OPEN_S ) ? true: false; 
 	new_node->value.object_val = NULL;
-	// save current env status to top stack node
+
 	if( *dfs_stack ){
 		STACK_DATA* top_node = ( STACK_DATA* ) top( dfs_stack );
 		new_node->parent 	 = top_node->j_data;
