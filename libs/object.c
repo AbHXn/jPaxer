@@ -71,7 +71,8 @@ static inline JSON_DTYPE test_integer( const char* str, long int** save_ptr) {
     if( !parse_long_safe ( str, &val ) ) return J_SKIP;
 
 	long *temp = get_J_INT( val );
-	if( !temp ) J_SKIP;
+	if( !temp ) 
+		return J_SKIP;
 
 	*temp = val;
 	*save_ptr = temp;
@@ -88,7 +89,8 @@ static inline JSON_DTYPE test_double( const char* str, double** save_ptr) {
     	return J_SKIP; 
 
    	double *temp = get_J_DOUBLE( val );
-	if( !temp ) J_SKIP;
+	if( !temp ) 
+		return J_SKIP;
 
    	*temp = val;
    	*save_ptr = temp;
@@ -102,7 +104,8 @@ static inline JSON_DTYPE test_bool( const char* str, bool** save_ptr) {
         bool val = strcmp( str, "true" ) == 0;
        
         bool *temp = get_J_BOOL( val );
-		if( !temp ) J_SKIP;
+		if( !temp ) 
+			return J_SKIP;
 
     	*temp = val;
     	*save_ptr = temp;
@@ -148,6 +151,7 @@ JSON_DTYPE non_returned_dtype ( const char *str ){
 void fill_value_acc( JSON_NODE** new_node, void* value_data, JSON_DTYPE type ){
 	if( !new_node || !(*new_node) || !value_data || type == J_SKIP ) 
 		return;
+	jobject* nnode;
 	switch( type ){
 		case J_DOUBLE:
 			(*new_node)->value.double_val 	= (double *) value_data;
@@ -165,7 +169,7 @@ void fill_value_acc( JSON_NODE** new_node, void* value_data, JSON_DTYPE type ){
 			memset(&(*new_node)->value, 0, sizeof((*new_node)->value));
 			break;
 		case J_OBJECT:
-			jobject* nnode = get_jobject( ( JSON_NODE* ) value_data );
+			nnode = get_jobject( ( JSON_NODE* ) value_data );
             if( !nnode ){
                 fprintf(stderr, "failed to update node\n");
                 return;

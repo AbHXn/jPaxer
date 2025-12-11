@@ -103,7 +103,8 @@ void load_next_buffer( size_t size ) {
 	}
 	else {
 		unsigned char* json_str = JSON_READER_OBJECT->reader.JSON_STR;
-		size_t sbyte_read = strlcpy( file_reader_buffer + SAFE_SIZE, json_str, MAX_READ_SIZE );
+		size_t sbyte_read = strlcpy( (char*)(file_reader_buffer + SAFE_SIZE), 
+									(const char *) json_str, MAX_READ_SIZE );
 	
 		byte_read = ( sbyte_read >= MAX_READ_SIZE ? MAX_READ_SIZE - 1 : sbyte_read );
 
@@ -136,7 +137,7 @@ READER* create_reader_for_str( const char* json_str ){
 	if( !json_cpy ) return NULL;
 	strcpy( json_cpy, json_str );
 
-	reader_obj->reader.JSON_STR = json_cpy;
+	reader_obj->reader.JSON_STR = (unsigned char*) json_cpy;
 	return reader_obj;
 }
 

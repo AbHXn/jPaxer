@@ -445,7 +445,7 @@ JSON_NODE* parse_JSON_from_str( const char* json_str ){
 	}
 	READER* new_reader_object = create_reader_for_str( json_str );
 	if( !new_reader_object ){
-		ERROR( stderr, get_read_error_msg( get_read_error() ) );
+		ERROR( stderr, "%s\n", get_read_error_msg( get_read_error() ) );
 		return NULL;
 	}
 	return parse_JSON( new_reader_object ); 
@@ -458,7 +458,7 @@ JSON_NODE* parse_JSON_from_FILE( FILE* json_file ){
 	}
 	READER* new_reader_object = create_reader_for_FILE( json_file );
 	if( !new_reader_object ){
-		ERROR( stderr, get_read_error_msg( get_read_error() ) );
+		ERROR( stderr, "%s\n", get_read_error_msg( get_read_error() ) );
 		return NULL;
 	}
 	return parse_JSON( new_reader_object ); 

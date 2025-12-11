@@ -153,7 +153,7 @@ void save_JSON_to_FILE(JSON_NODE* json_data, FILE* json_file, int indent) {
 
         switch (jnode->dtype) {
             case J_STRING:
-                write_escaped_string( json_file, jnode->value.string_val );
+                write_escaped_string( json_file, (const char*) jnode->value.string_val );
                 break;
 
             case J_INT:
@@ -175,6 +175,9 @@ void save_JSON_to_FILE(JSON_NODE* json_data, FILE* json_file, int indent) {
             case J_OBJECT:
                 fputc('\n', json_file);
                 save_JSON_to_FILE(jnode, json_file, indent + 4);
+                break;
+            case J_SKIP:
+            default:
                 break;
         }
         contents = contents->next;

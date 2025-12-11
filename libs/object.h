@@ -33,7 +33,7 @@ typedef struct _jnode{
 	char*		key;
 	JSON_DTYPE  dtype;
 	union {
-		char*     string_val;
+		unsigned char*     string_val;
 		double*   double_val;
 		long* 	  int_val;
 		bool* 	  bool_val;
