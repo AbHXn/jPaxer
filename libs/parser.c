@@ -362,7 +362,7 @@ JSON_NODE* parse_JSON( READER* JSON_READER ){
 					break;
 				}
 				case OPEN_S: 
-				case OPEN_C: 	
+				case OPEN_C: 
 					handle_open_square_or_curly( &env, c_char, &dfs_stack );
 					break;
 				case SEMI: {
@@ -435,6 +435,10 @@ JSON_NODE* parse_JSON( READER* JSON_READER ){
 		return NULL;
 	}
 	flush_buffer();
+	if( !stack_limit_counter ){
+		ERROR(stderr, "STACK IS EMPTY\n");
+		return NULL;
+	}
 	return (JSON_NODE*) (((STACK_DATA* ) top( &dfs_stack ))->j_data);
 }
 

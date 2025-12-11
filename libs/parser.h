@@ -85,7 +85,7 @@ static void PRINT_SYNTAX_ERROR( size_t line_number, int c_char ){
 	int ptr = 0;
 	const char* err_string = get_string_some_range( ERR_BUFF_SIZE, &ptr );
 	fprintf(stderr, "Json Syntax Error at %ld: \n", line_number);
-	if( strlen(err_string) > 0 ){
+	if( err_string && strlen(err_string) > 0 ){
 		ERROR(stderr, "\033[1;31m%s\033[0m\n", err_string);
 		while( --ptr > 0 ) putchar(' ');
 	}

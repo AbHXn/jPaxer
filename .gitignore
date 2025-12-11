@@ -2,3 +2,7 @@ bins
 a.out
 test.json
 large_json
+fuzz_jpaxer.c
+fuzz_jpaxer
+corpus
+main.c
