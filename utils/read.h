@@ -63,7 +63,6 @@ READ_ERRORS get_read_error( void );
 bool 		push_string 	 	  ( const char* ) ;
 bool 		push_char_buffer	  ( const char s ) ;
 void  		load_next_buffer 	  ( size_t x ) ;
-void 		strip 				  ( char * ) ;
 char*       get_string_some_range (size_t, int*);
 void 		flush_buffer		  ( void );
 

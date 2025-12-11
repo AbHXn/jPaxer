@@ -20,22 +20,6 @@ const char* get_read_error_msg( READ_ERRORS err_raised ){
     return NULL;
 }
 
-void strip(char *s) {
-    char *end;
-    if (s == NULL || *s == '\0')
-        return;
-    while (isspace((unsigned char)*s)) 
-        s++;
-    if (*s == '\0') {
-        *s = '\0';
-        return;
-    }
-    end = s + strlen(s) - 1;
-    while (end > s && isspace((unsigned char)*end)) 
-        end--;
-    *(end + 1) = '\0';
-}
-
 READ_ERRORS get_read_error( void ){
 	READ_ERRORS err_raised = READ_ERR_RAISED;
 	READ_ERR_RAISED = NO_READ_ERRORS;
