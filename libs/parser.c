@@ -244,7 +244,6 @@ void handle_open_square_or_curly( WORKING_ENV** env, int c_char, STACK** dfs_sta
 		STACK_DATA* top_node = ( STACK_DATA* ) top( dfs_stack );
 		new_node->parent 	 = top_node->j_data;
 		top_node->list_index = ( *env )->list_index;
-		top_node->FLAG 		 = ( *env )->FLAG;
 	}
 	if( !push_JSON_NODE_to_stack ( (void *) new_node, dfs_stack ) ){
 		ERROR( stderr, "%s\n", get_stack_error_msg( get_stack_error() ) );
@@ -296,7 +295,6 @@ void handle_closing_square_or_curly( WORKING_ENV**env, int c_char, STACK** dfs_s
 	if( dfs_stack ){
 		STACK_DATA* top_node = ( STACK_DATA* ) top( dfs_stack );
 		RESET_ENV( env );
-		( *env )->FLAG  = top_node->FLAG;
 		( *env )->list_index   = top_node->list_index;
 	}
 	( *env )->FLAG = 0;
